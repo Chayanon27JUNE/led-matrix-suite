@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LED Matrix 6m×6m — Module Map & Universe Diagram</title>
+<style>
+  :root{
+    --bg:#07090f; --panel:#0e131f; --panel2:#131a2b; --line:#1f2a44;
+    --txt:#dfe7f5; --muted:#8b97b4; --accent:#37e6b4; --accent2:#4aa8ff; --warn:#ffd166;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:radial-gradient(1200px 700px at 70% -10%, #10203a 0%, var(--bg) 55%);
+    color:var(--txt); font-family:"Segoe UI",Tahoma,system-ui,sans-serif; line-height:1.5;}
+  .wrap{max-width:1240px;margin:0 auto;padding:26px 20px 90px}
+  header.hero{text-align:center;padding:20px 10px 6px}
+  .kicker{letter-spacing:.28em;font-size:12px;color:var(--accent);text-transform:uppercase;font-weight:700}
+  h1{font-size:clamp(24px,3.6vw,40px);margin:.25em 0 .1em;
+     background:linear-gradient(90deg,#fff,var(--accent) 55%,var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:var(--muted);max-width:760px;margin:.4em auto 0;font-size:14.5px}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0 4px}
+  .badge{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--muted)}
+  .badge b{color:var(--accent)}
+  section{margin-top:30px}
+  .h2{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;margin:0 0 12px}
+  .h2 .n{min-width:26px;height:26px;padding:0 6px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;display:grid;place-items:center;font-size:13px;font-weight:800}
+  .card{background:linear-gradient(180deg,var(--panel),#0b1120);border:1px solid var(--line);border-radius:16px;padding:18px}
+
+  /* ===== language switcher ===== */
+  .langbar{position:fixed;top:14px;right:16px;z-index:50;display:flex;gap:5px;
+    background:rgba(14,19,31,.85);border:1px solid var(--line);border-radius:11px;padding:5px;backdrop-filter:blur(6px)}
+  .langbar button{background:transparent;border:none;color:var(--muted);font-size:12.5px;font-weight:700;
+    border-radius:8px;padding:6px 12px;cursor:pointer;transition:.12s}
+  .langbar button:hover{color:var(--txt)}
+  .langbar button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+
+  /* ===== tabs ===== */
+  .tabs{display:flex;gap:8px;justify-content:center;margin-top:20px}
+  .tabs button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+    border-radius:11px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
+  .tabs button:hover{color:var(--txt);border-color:var(--accent2)}
+  .tabs button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;border-color:transparent}
+
+  /* ===== grid layout ===== */
+  .gridWrap{display:grid;grid-template-columns:1fr 320px;gap:18px}
+  @media(max-width:960px){.gridWrap{grid-template-columns:1fr}}
+  .matrix{display:grid;grid-template-columns:34px repeat(12,1fr);gap:4px;user-select:none}
+  .mhead{display:grid;place-items:center;font-size:12px;color:var(--muted);font-weight:700}
+  .rowlab{display:grid;place-items:center;font-size:11px;color:var(--muted)}
+  .module{aspect-ratio:1;display:grid;place-items:center;border-radius:7px;font-size:clamp(9px,1.1vw,13px);
+    font-weight:700;cursor:pointer;transition:transform .1s, box-shadow .1s, outline .1s;outline:2px solid transparent;color:#1a1208}
+  .module:hover{transform:scale(1.12);z-index:2;box-shadow:0 4px 18px -4px rgba(0,0,0,.7)}
+  .module.sel{outline:2.5px solid #fff;box-shadow:0 0 0 4px rgba(55,230,180,.35),0 6px 22px -6px rgba(0,0,0,.8);transform:scale(1.14);z-index:3}
+  .module.dimmed{opacity:.22}
+  .colHint{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:11px;color:var(--muted);cursor:pointer}
+  .chip:hover{border-color:var(--accent2);color:var(--txt)}
+  .chip .sw{width:12px;height:12px;border-radius:3px}
+
+  /* ===== detail panel ===== */
+  .detail{position:sticky;top:14px;display:flex;flex-direction:column;gap:12px;align-self:start}
+  .dcard{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .dcard h3{margin:0 0 4px;font-size:22px;display:flex;align-items:center;gap:10px}
+  .dcard h3 .sw{width:20px;height:20px;border-radius:5px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px;margin-top:8px}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-weight:700;color:var(--accent)}
+  .kv .v.mono{font-family:Consolas,monospace}
+  .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:26px 8px}
+  .finder label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:6px}
+  .finder .row{display:flex;gap:8px}
+  .finder input{flex:1;background:#0a1120;border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:9px 12px;font-size:14px;outline:none;min-width:0}
+  .finder input:focus{border-color:var(--accent)}
+  .finder button{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#04121a;font-weight:800;border-radius:9px;padding:0 16px;cursor:pointer;font-size:13.5px;white-space:nowrap}
+  .finder .msg{font-size:12px;color:var(--warn);margin-top:6px;min-height:16px}
+
+  /* ===== 3D tab ===== */
+  canvas#c3d{width:100%;height:560px;display:block;border-radius:12px;cursor:grab;
+    background:radial-gradient(700px 460px at 50% 42%,#0a1526,#05080f);border:1px solid var(--line)}
+  canvas#c3d:active{cursor:grabbing}
+  .hint3d{font-size:12px;color:var(--muted);margin-top:8px}
+  .viewbtns{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .viewbtns button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:.12s}
+  .viewbtns button:hover{color:var(--txt);border-color:var(--accent2)}
+  .viewbtns button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;border-color:transparent}
+  .toggle3{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;user-select:none;margin-bottom:9px}
+  .toggle3 input{accent-color:var(--accent);width:16px;height:16px}
+  .legend3{margin-top:6px;border-top:1px solid var(--line);padding-top:10px;font-size:12px;color:var(--muted)}
+  .legend3 b{color:var(--accent)}
+
+  /* ===== power tab ===== */
+  .pwrgrid{display:grid;grid-template-columns:300px 1fr;gap:20px}
+  @media(max-width:880px){.pwrgrid{grid-template-columns:1fr}}
+  .pwrctl{display:flex;flex-direction:column;gap:13px}
+  .pwrctl .ctl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+  .pwrctl .ctl label b{color:var(--accent);font-variant-numeric:tabular-nums}
+  .pwrctl input[type=range]{width:100%;accent-color:var(--accent)}
+  .pwrstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;align-content:start}
+  .pstat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .pstat .k{font-size:11px;color:var(--muted);line-height:1.35}
+  .pstat .v{font-size:21px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;margin-top:2px}
+  .pstat .v small{font-size:12px;color:var(--muted);font-weight:600}
+  .pstat.hot .v{color:#ff8a5c}
+  .pstat.cool .v{color:var(--accent2)}
+  .pwrwarn{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+  .wrow{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:0 11px 11px 0;padding:11px 14px;font-size:13px;color:var(--muted)}
+  .wrow.bad{border-left-color:#ff6b5d}
+  .wrow.ok{border-left-color:var(--accent)}
+  .wrow b{color:var(--txt)}
+  .pwrgrid .seg,#s_mode{display:flex;gap:6px;flex-wrap:wrap}
+  .pwrgrid .seg button,#s_mode button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;transition:.12s}
+  .pwrgrid .seg button:hover,#s_mode button:hover{color:var(--txt);border-color:var(--accent2)}
+  .pwrgrid .seg button.on,#s_mode button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;border-color:transparent}
+  .feedwrap{overflow-x:auto}
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .opt{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+  .opt.pick{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .opt .t{font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:7px}
+  .opt .tag{font-size:10px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;border-radius:999px;padding:2px 8px}
+  .opt ul{margin:8px 0 0;padding-left:17px;font-size:12.5px;color:var(--muted);line-height:1.7}
+  .opt ul b{color:var(--txt)}
+
+  /* ===== architecture ===== */
+  .arch{display:flex;flex-direction:column;align-items:center;gap:0}
+  .abox{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:13px 22px;text-align:center;min-width:250px}
+  .abox .t{font-weight:800;font-size:15px}
+  .abox .d{font-size:12px;color:var(--muted);margin-top:3px}
+  .abox.hl{border-color:var(--accent);box-shadow:0 0 24px -10px var(--accent)}
+  .abox.hl2{border-color:var(--accent2);box-shadow:0 0 24px -10px var(--accent2)}
+  .arrow{display:flex;flex-direction:column;align-items:center;color:var(--muted);font-size:11.5px;padding:2px 0}
+  .arrow .ln{width:2px;height:16px;background:linear-gradient(180deg,var(--accent),var(--accent2))}
+  .arrow .lb{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 12px;margin:3px 0;color:var(--accent);font-weight:700}
+  .fan{display:flex;gap:5px;flex-wrap:nowrap;justify-content:flex-start;margin-top:4px;
+       max-width:100%;overflow-x:auto;padding:2px 2px 6px}
+  .fan .f{border-radius:7px;padding:6px 8px;font-size:11px;font-weight:700;color:#1a1208;cursor:pointer;transition:transform .1s;flex:0 0 auto;text-align:center}
+  .fan .f:hover{transform:scale(1.08)}
+  .fan .f small{display:block;font-weight:500;font-size:9px;opacity:.8}
+  .archnote{margin-top:14px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:0 10px 10px 0;padding:11px 14px;font-size:13px;color:var(--muted)}
+  .archnote b{color:var(--warn)}
+
+  /* ===== table ===== */
+  .tbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .tbar input{background:#0a1120;border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:8px 12px;font-size:13.5px;outline:none;width:220px}
+  .tbar input:focus{border-color:var(--accent)}
+  .tbar .fbtn{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px 11px;font-size:12px;cursor:pointer}
+  .tbar .fbtn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;border-color:transparent;font-weight:700}
+  .tscroll{max-height:480px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+  table.mods{width:100%;border-collapse:collapse;font-size:13px}
+  table.mods th{position:sticky;top:0;background:#121a2c;color:var(--accent);padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);z-index:1}
+  table.mods td{padding:7px 12px;border-bottom:1px solid #16203a}
+  table.mods tr{cursor:pointer}
+  table.mods tbody tr:hover{background:#152036}
+  table.mods tr.sel{background:#173049;outline:1px solid var(--accent)}
+  .msw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+  .mono{font-family:Consolas,monospace}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px}
+</style>
+<link rel="stylesheet" href="assets/lmx.css">
+<script src="assets/i18n.js"></script>
+<script src="assets/lmx.js"></script>
+</head>
+<body>
+<div class="langbar" id="langbar">
+  <button data-lang="th" class="on">ไทย</button>
+  <button data-lang="en">EN</button>
+  <button data-lang="zh">中文</button>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">3D LED Matrix · 6m × 6m · Art-Net Plan</div>
+    <h1>144 Module — Universe & IP Map</h1>
+    <p class="sub" id="i_sub"></p>
+    <div class="badges">
+      <span class="badge"><b>144</b> module</span>
+      <span class="badge"><b>248,832</b> pixel</span>
+      <span class="badge"><b>746,496</b> channel</span>
+      <span class="badge"><b>1,584</b> universe</span>
+      <span class="badge">1 module = <b>1,728 px</b> · <b>11 U</b></span>
+    </div>
+    <div class="tabs" id="tabs">
+      <button data-tab="2d" class="on" id="i_tab2d"></button>
+      <button data-tab="3d" id="i_tab3d"></button>
+      <button data-tab="wire" id="i_tabwire"></button>
+      <button data-tab="power" id="i_tabpower"></button>
+    </div>
+  </header>
+
+  <!-- ================= TAB 2D ================= -->
+  <div id="tab2d">
+  <section>
+    <div class="h2"><span class="n">1</span> <span id="i_sec1"></span></div>
+    <div class="card gridWrap">
+      <div>
+        <div class="matrix" id="matrix"></div>
+        <div class="colHint" id="colHint"></div>
+      </div>
+      <div class="detail">
+        <div class="dcard" id="dcard"></div>
+        <div class="dcard finder">
+          <label id="i_findlabel"></label>
+          <div class="row">
+            <input type="number" id="uFind" min="1" max="1584" placeholder="512">
+            <button id="uBtn"></button>
+          </div>
+          <div class="msg" id="uMsg"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2"><span class="n">2</span> <span id="i_sec2"></span></div>
+    <div class="card">
+      <div class="arch">
+        <div class="abox"><div class="t">🎛️ <span id="i_in_t"></span></div><div class="d" id="i_in_d"></div></div>
+        <div class="arrow"><div class="ln"></div></div>
+        <div class="abox hl"><div class="t">🖥️ Main PC</div><div class="d" id="i_main_d"></div></div>
+        <div class="arrow"><div class="ln"></div><div class="lb">NDI</div><div class="ln"></div></div>
+        <div class="abox hl2"><div class="t">⚙️ Management PC</div><div class="d" id="i_mgmt_d"></div></div>
+        <div class="arrow"><div class="ln"></div><div class="lb" id="i_artnet_lb"></div><div class="ln"></div></div>
+        <div class="fan" id="fan"></div>
+      </div>
+      <div class="archnote" id="i_note"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2"><span class="n">3</span> <span id="i_sec3"></span></div>
+    <div class="card">
+      <div class="tbar" id="tbar">
+        <input type="text" id="tSearch">
+        <button class="fbtn on" data-f="ALL" id="i_allbtn"></button>
+      </div>
+      <div class="tscroll" id="tscroll">
+        <table class="mods">
+          <thead><tr>
+            <th id="i_th_mod"></th><th id="i_th_ip"></th><th id="i_th_uni"></th>
+            <th id="i_th_px"></th><th id="i_th_ch"></th><th id="i_th_pos"></th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  </div><!-- /tab2d -->
+
+  <!-- ================= TAB 3D ================= -->
+  <div id="tab3d" style="display:none">
+  <section>
+    <div class="h2"><span class="n">3D</span> <span id="i_sec3d"></span></div>
+    <div class="card gridWrap">
+      <div>
+        <canvas id="c3d"></canvas>
+        <div class="hint3d" id="i_hint3d"></div>
+      </div>
+      <div class="detail">
+        <div class="dcard" id="dcard3d"></div>
+        <div class="dcard">
+          <div class="viewbtns" id="viewbtns">
+            <span id="i_vwlabel" style="font-size:12.5px;color:var(--muted)"></span>
+            <button data-vw="persp" class="on" id="i_vwpersp"></button>
+            <button data-vw="top" id="i_vwtop"></button>
+            <button data-vw="front" id="i_vwfront"></button>
+          </div>
+          <label class="toggle3"><input type="checkbox" id="rotChk"> <span id="i_rot"></span></label>
+          <label class="toggle3"><input type="checkbox" id="pixChk" checked> <span id="i_pix"></span></label>
+          <div class="colHint" id="colHint3d" style="margin-top:4px"></div>
+          <div class="legend3" id="i_legend3d"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div><!-- /tab3d -->
+
+  <!-- ================= TAB WIRE ================= -->
+  <div id="tabwire" style="display:none">
+  <section>
+    <div class="h2"><span class="n">🔌</span> <span id="i_secwire"></span></div>
+    <div class="card gridWrap">
+      <div>
+        <canvas id="c3w" style="width:100%;height:560px;display:block;border-radius:12px;cursor:grab;background:radial-gradient(700px 460px at 50% 42%,#0a1526,#05080f);border:1px solid var(--line)"></canvas>
+        <div class="hint3d" id="i_hintwire"></div>
+      </div>
+      <div class="detail">
+        <div class="dcard" id="dcardw"></div>
+        <div class="dcard">
+          <div class="viewbtns" id="viewbtnsw">
+            <span id="i_vwlabelw" style="font-size:12.5px;color:var(--muted)"></span>
+            <button data-vw="persp" class="on" id="i_vwperspw"></button>
+            <button data-vw="top" id="i_vwtopw"></button>
+            <button data-vw="front" id="i_vwfrontw"></button>
+          </div>
+          <label class="toggle3"><input type="checkbox" id="wCab" checked> <span id="i_wcab"></span></label>
+          <label class="toggle3"><input type="checkbox" id="wData" checked> <span id="i_wdata"></span></label>
+          <label class="toggle3"><input type="checkbox" id="wPow" checked> <span id="i_wpow"></span></label>
+          <label class="toggle3"><input type="checkbox" id="wLed" checked> <span id="i_wled"></span></label>
+          <div class="legend3" id="i_legendwire"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div><!-- /tabwire -->
+
+  <!-- ================= TAB POWER ================= -->
+  <div id="tabpower" style="display:none">
+  <section>
+    <div class="h2"><span class="n">⚡</span> <span id="i_secpwr1"></span></div>
+    <div class="card">
+      <div class="pwrgrid">
+        <div class="pwrctl">
+          <div class="ctl"><label><span id="i_p_wsqm"></span> <b id="v_wsqm">3040</b> W/m²</label><input type="range" id="r_wsqm" min="800" max="4500" step="20" value="3040"></div>
+          <div class="ctl"><label><span id="i_p_load"></span> <b id="v_load">100</b>%</label><input type="range" id="r_load" min="20" max="100" step="5" value="100"></div>
+          <div class="ctl"><label><span id="i_p_pf"></span> <b id="v_pf">0.95</b></label><input type="range" id="r_pf" min="85" max="100" step="1" value="95"></div>
+          <div class="ctl"><label id="i_p_volt"></label>
+            <div class="seg" id="s_volt"><button data-v="220" class="on">220 V</button><button data-v="230">230 V</button><button data-v="240">240 V</button></div></div>
+          <div class="ctl"><label id="i_p_brk"></label>
+            <div class="seg" id="s_brk"><button data-v="16">16 A</button><button data-v="20" class="on">20 A</button><button data-v="32">32 A</button></div></div>
+          <div class="ctl"><label id="i_p_lay"></label>
+            <div class="seg" id="s_lay"><button data-v="block" class="on" id="i_lay_block"></button><button data-v="inter" id="i_lay_inter"></button></div></div>
+        </div>
+        <div class="pwrstats" id="pwrstats"></div>
+      </div>
+      <div class="pwrwarn" id="pwrwarn"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2"><span class="n">⚡</span> <span id="i_secpwr2"></span></div>
+    <div class="card gridWrap">
+      <div>
+        <div class="seg" id="s_mode" style="margin-bottom:12px">
+          <button data-v="phase" class="on" id="i_m_phase"></button>
+          <button data-v="circuit" id="i_m_circuit"></button>
+        </div>
+        <div class="matrix" id="pmatrix"></div>
+        <div class="colHint" id="pLegend"></div>
+      </div>
+      <div class="detail">
+        <div class="dcard" id="dcardp"></div>
+        <div class="dcard"><div class="legend3" id="i_legendpwr"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2"><span class="n">🔗</span> <span id="i_secpwr6"></span></div>
+    <div class="card">
+      <div class="pwrgrid">
+        <div class="pwrctl">
+          <div class="ctl"><label id="i_p_dtop"></label>
+            <div class="seg" id="s_dtop" style="flex-direction:column;align-items:stretch">
+              <button data-v="chain12" class="on" id="i_dt_chain"></button>
+              <button data-v="match" id="i_dt_match"></button>
+              <button data-v="bypass" id="i_dt_bypass"></button>
+            </div>
+          </div>
+          <div class="ctl"><label id="i_p_fail"></label>
+            <div class="seg" id="s_fail">
+              <button data-v="none" class="on" id="i_fail_none"></button>
+              <button data-v="0">C1</button><button data-v="1">C2</button><button data-v="2">C3</button>
+            </div>
+          </div>
+          <div class="legend3" id="i_faillegend"></div>
+        </div>
+        <div>
+          <div class="pwrstats" id="failstats" style="margin-bottom:14px"></div>
+          <div class="matrix" id="fmatrix"></div>
+          <div class="colHint" id="fLegend"></div>
+        </div>
+      </div>
+      <div class="pwrwarn" id="failwarn"></div>
+      <div class="feedwrap" style="margin-top:16px">
+        <table class="mods" id="topocmp">
+          <thead><tr><th id="i_tc_opt"></th><th id="i_tc_worst"></th><th id="i_tc_dark"></th><th id="i_tc_port"></th><th id="i_tc_note"></th></tr></thead>
+          <tbody id="topocmpbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2"><span class="n">🧊</span> <span id="i_secpwr5"></span></div>
+    <div class="card gridWrap">
+      <div>
+        <canvas id="c3p" style="width:100%;height:580px;display:block;border-radius:12px;cursor:grab;background:radial-gradient(700px 460px at 50% 42%,#0a1526,#05080f);border:1px solid var(--line)"></canvas>
+        <div class="hint3d" id="i_hintpwr3d"></div>
+      </div>
+      <div class="detail">
+        <div class="dcard" id="dcardp3"></div>
+        <div class="dcard">
+          <div class="viewbtns" id="viewbtnsp">
+            <span id="i_vwlabelp" style="font-size:12.5px;color:var(--muted)"></span>
+            <button data-vw="persp" class="on" id="i_vwperspp"></button>
+            <button data-vw="top" id="i_vwtopp"></button>
+            <button data-vw="front" id="i_vwfrontp"></button>
+          </div>
+          <div class="ctl" style="margin-bottom:11px">
+            <label id="i_p_phfilter" style="font-size:12.5px;color:var(--muted);display:block;margin-bottom:6px"></label>
+            <div class="seg" id="s_phf">
+              <button data-v="all" class="on" id="i_phf_all"></button>
+              <button data-v="0" style="border-left:3px solid #ff6b5d">L1</button>
+              <button data-v="1" style="border-left:3px solid #ffd166">L2</button>
+              <button data-v="2" style="border-left:3px solid #4aa8ff">L3</button>
+            </div>
+          </div>
+          <label class="toggle3"><input type="checkbox" id="pLbl" checked> <span id="i_p_lbl"></span></label>
+          <label class="toggle3"><input type="checkbox" id="pBrk" checked> <span id="i_p_brkshow"></span></label>
+          <label class="toggle3"><input type="checkbox" id="pLed" checked> <span id="i_p_ledshow"></span></label>
+          <div class="legend3" id="i_legendpwr3d"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2"><span class="n">🔧</span> <span id="i_secpwr3"></span></div>
+    <div class="card">
+      <div class="feedwrap"><div id="feeddiag"></div></div>
+      <div class="tscroll" style="max-height:360px;margin-top:16px">
+        <table class="mods">
+          <thead><tr>
+            <th id="i_ct_id"></th><th id="i_ct_ph"></th><th id="i_ct_col"></th>
+            <th id="i_ct_mod"></th><th id="i_ct_w"></th><th id="i_ct_a"></th><th id="i_ct_brk"></th>
+          </tr></thead>
+          <tbody id="ckttbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2"><span class="n">💡</span> <span id="i_secpwr4"></span></div>
+    <div class="card"><div class="opts" id="pwropts"></div></div>
+  </section>
+  </div><!-- /tabpower -->
+
+  <footer>
+    <span id="i_footer1"></span><br>
+    <span class="mono" style="font-size:11.5px">start = col×132 + (row−1)×11 + 1 · A1=U1–11 → A12=U122–132 → B1=U133–143 → … → L12=U1574–1584</span>
+  </footer>
+</div>
+
+<script>
+/* ===== i18n ===== */
+const I18N={
+th:{
+  sub:'แผนผัง interactive ของจอ LED volumetric 144 โมดูล (12 คอลัมน์ A–L × 12 แถว) — คลิกโมดูลเพื่อดู IP กับช่วง Universe · โมดูลละ 6×6×48 = 1,728 pixel = 11 universe',
+  tab2d:'📋 แผนผัง 2D', tab3d:'🧊 3D Simulation',
+  sec1:'แผนผังโมดูล — คลิกเพื่อดูรายละเอียด',
+  sec2:'สถาปัตยกรรมระบบ — 2 เครื่อง',
+  sec3:'ตารางโมดูลทั้งหมด (144)',
+  sec3d:'3D Simulation — แท่งโมดูล 144 แท่ง (แท่งละ 6×6×48 pixel)',
+  hint3d:'🖱️ ลากเพื่อหมุน · scroll เพื่อซูม · คลิกเพื่อเลือกโมดูล — โมดูลที่เลือกจะมีกรอบขาว + เม็ด pixel เต็มความละเอียด 6×6×48',
+  rot:'หมุนอัตโนมัติ', pix:'แสดงเม็ด pixel ของโมดูลที่เลือก (6×6×48)',
+  vwlabel:'มุมมอง:', vwpersp:'เฉียง', vwtop:'บน', vwfront:'หน้า',
+  tabwire:'🔌 การต่อสาย',
+  secwire:'การต่อสาย Cabinet — Data & Power แบบ daisy-chain 12 ชุด (คอลัมน์ละชุด)',
+  hintwire:'🖱️ ลากหมุน · scroll ซูม · คลิก cabinet ด้านบนเพื่อเลือกโมดูล — สาย Data (เขียว, วิ่ง) เข้าแถว 1 → 12 ของแต่ละคอลัมน์',
+  wcab:'แสดง Cabinet (ด้านบน)', wdata:'สาย Data (เขียว)', wpow:'สาย Power (แดง)', wled:'แสดงก้อน LED',
+  legendwire:'💡 <b>Data:</b> Management PC → cabinet แถว 1 → 2 → … → 12 (daisy-chain · 11U/โมดูล · 132U/คอลัมน์ = 1 IP) · <b>Power:</b> จ่ายไล่ในคอลัมน์เดียวกัน · รวม 12 ชุดอิสระ ต่อแนวตรงเหมือนหน้างานจริง',
+  tabpower:'⚡ ระบบไฟ',
+  secpwr1:'เครื่องคำนวณโหลดไฟ — ปรับค่าแล้วดูผลทันที',
+  secpwr2:'ผังการแบ่งวงจร / เฟส บนจอจริง',
+  secpwr3:'ไดอาแกรมการจ่ายไฟ + ตารางวงจร',
+  secpwr4:'ตัวเลือกระบบไฟที่ใช้ได้',
+  secpwr5:'3D การเดินสายไฟ — สายวิ่งไปไหน กินกี่แอมป์ เบรกเกอร์อยู่จุดไหน',
+  secpwr6:'ความสอดคล้อง Data ↔ Power — จำลองไฟดับ',
+  p_dtop:'วิธีต่อ Data', p_fail:'จำลองไฟดับ (วงจรลำดับนี้ของทุกคอลัมน์)',
+  dt_chain:'A · เชนยาว 12 โมดูล/คอลัมน์ (ปัจจุบัน)',
+  dt_match:'B · แยกเชนให้ตรงวงจรไฟ',
+  dt_bypass:'C · เชนยาว + Data Bypass Relay',
+  fail_none:'ไฟปกติ',
+  fs_ok:'ปกติ', fs_dead:'ดับ (ไม่มีไฟ)', fs_dark:'ดำ (มีไฟ ไม่มี data)', fs_lost:'ภาพหายรวม',
+  faillegend:'💡 <b>จุดที่คุณเป็นห่วง:</b> โมดูล "ดำ" คือ<b>ยังกินไฟอยู่แต่จอไม่ติด</b> เพราะ data chain ขาดที่ต้นทาง — ช่างจะงงว่าเสียตรงไหน เพราะไฟเข้าปกติ · ลองสลับวิธีต่อ data แล้วกดจำลองไฟดับดู จะเห็นความต่างทันที',
+  fw_none:'✅ ระบบปกติ — ลองกด C1 / C2 / C3 เพื่อจำลองว่าวงจรไหนดับแล้วจะเกิดอะไร',
+  fw_dark:(dark,dead)=>'🚨 <b>ไฟดับ '+dead+' โมดูล แต่จอหายไป '+(dark+dead)+' โมดูล</b> — เพราะอีก <b>'+dark+' โมดูลยังมีไฟแต่ data ขาด</b> (chain ถูกตัดที่ต้นทาง) · นี่คือเคสที่หาสาเหตุยากที่สุดหน้างาน',
+  fw_clean:dead=>'✅ <b>ดับเฉพาะ '+dead+' โมดูลที่ไม่มีไฟจริง</b> — ไม่มีโมดูลที่ "มีไฟแต่จอดำ" ขอบเขตไฟกับ data ตรงกัน หาจุดเสียได้ทันที',
+  tc_opt:'วิธีต่อ Data', tc_worst:'กรณีแย่สุด (ภาพหาย)', tc_dark:'โมดูล "มีไฟแต่ดำ"', tc_port:'Port ที่ต้องใช้', tc_notehdr:'หมายเหตุ',
+  tc_chain:'A · เชนยาว 12', tc_match:'B · แยกตามวงจรไฟ', tc_bypass:'C · Bypass Relay', tc_percol:'คอลัมน์',
+  tc_note:k=>({
+    chain12:'ประหยัด port ที่สุด แต่ไฟต้นเชนดับ = ดับทั้งคอลัมน์',
+    match:'ขอบเขตไฟ=data ตรงกัน หาจุดเสียง่ายสุด แต่ต้องใช้ port มากขึ้น 3 เท่า',
+    bypass:'ดีที่สุดถ้า cabinet รองรับ — ไฟดับแล้ว data ยังวิ่งผ่านไปตัวถัดไปได้ (ต้องเช็คสเปกตู้)'
+  }[k]),
+  hintpwr3d:'🖱️ ลากหมุน · scroll ซูม · คลิก cabinet เพื่อดูวงจรที่จ่ายโมดูลนั้น (สายจะเป็นสีขาว) · ความหนาสาย = กระแสที่ไหลจริง',
+  p_phfilter:'กรองเฟส (ดูทีละเฟสจะเห็นสายชัด)', phf_all:'ทุกเฟส',
+  p_lbl:'แสดงตัวเลขบนสาย (A / mm²)', p_brkshow:'แสดงเบรกเกอร์', p_ledshow:'แสดงก้อน LED',
+  p3_main:'ตู้เมน 3 เฟส', p3_sub:'ตู้ย่อย', p3_brk:'เบรกเกอร์',
+  legendpwr3d:'💡 <b>เส้นทางไฟ:</b> ตู้เมน (พื้น) → สายขึ้น riser → ตู้ย่อย 3 ตู้บน truss → แตกวงจรย่อยไปแต่ละคอลัมน์ → หย่อนลง cabinet<br><b>เบรกเกอร์:</b> ตัวใหญ่ที่ตู้เมน (กันทั้งเฟส) + ตัวเล็กทุกวงจรที่<b>ตู้ย่อย</b> (จุดสี่เหลี่ยมข้างตู้) — วางไว้บน truss ใกล้จอ สายวงจรย่อยจะสั้น แรงดันตกน้อย',
+  p_wsqm:'กำลังไฟต่อตารางเมตร', p_load:'ระดับโหลด (สว่างเฉลี่ย)', p_pf:'Power Factor',
+  p_volt:'แรงดัน (เฟส-นิวทรัล)', p_brk:'เบรกเกอร์วงจรย่อย', p_lay:'รูปแบบจัดเฟส',
+  lay_block:'แบ่งโซน (A-D/E-H/I-L)', lay_inter:'สลับเฟส (A,B,C วน)',
+  m_phase:'ดูตามเฟส', m_circuit:'ดูตามวงจร',
+  ps_totmax:'กำลังไฟรวม (ขาวเต็มจอ)', ps_totnow:'กำลังไฟที่โหลดปัจจุบัน',
+  ps_mod:'ต่อ 1 โมดูล', ps_col:'ต่อ 1 คอลัมน์ (12 โมดูล)',
+  ps_modckt:'โมดูลต่อวงจร', ps_ckt:'จำนวนวงจรย่อยทั้งหมด',
+  ps_iphase:'กระแสต่อเฟส', ps_iphase_sub:'(3 เฟส)',
+  ps_main:'เมนเบรกเกอร์แนะนำ', ps_main_sub:'ต่อเฟส',
+  u_modules:'โมดูล', u_circuits:'วงจร',
+  w_col:(a,n,b)=>'🚨 <b>1 คอลัมน์กินไฟ '+a+' A</b> — ต่อ daisy-chain 12 โมดูลในสายเดียวไม่ได้ ต้องแยกเป็น <b>'+n+' วงจร × '+b+' A</b> ต่อคอลัมน์',
+  w_phase:(a,b,w)=>'⚡ ต้องใช้ไฟ <b>3 เฟส</b> — แต่ละเฟสรับ <b>'+a+' A</b> → เมนเบรกเกอร์ <b>'+b+' A/เฟส</b> · สายเมนประมาณ <b>'+w+' mm²</b> (ทองแดง — ช่างไฟต้องคำนวณตามระยะ/วิธีเดินสายจริง)',
+  w_single:a=>'ℹ️ ถ้าใช้เฟสเดียวจะกิน <b>'+a+' A</b> ซึ่งเกินระบบไฟทั่วไป — ไม่แนะนำ',
+  w_inrush:'✅ <b>Inrush current:</b> PSU ของ LED ตอนเปิดกระชาก 10–20 เท่า → ต้องทยอยเปิดเป็นชุด (staged power-up) หรือใช้ PSU ที่มี soft-start ไม่งั้นเบรกเกอร์จะ trip ตอนเปิดเครื่อง',
+  lg_block:i=>['คอลัมน์ A–D','คอลัมน์ E–H','คอลัมน์ I–L'][i],
+  lg_inter:i=>['คอลัมน์ A,D,G,J','คอลัมน์ B,E,H,K','คอลัมน์ C,F,I,L'][i],
+  lg_ckt:(n,m,tot)=>'<div class="chip">คอลัมน์ละ '+n+' วงจร · วงจรละ '+m+' โมดูล · รวม '+tot+' วงจร</div>',
+  ct_id:'วงจร', ct_ph:'เฟส', ct_col:'คอลัมน์', ct_mod:'โมดูล', ct_w:'กำลังไฟ', ct_a:'กระแส', ct_brk:'เบรกเกอร์ / สาย',
+  fd_main:'ตู้เมน 3 เฟส', fd_box:'ตู้ย่อย',
+  empty_p:'👆 คลิกโมดูลบนผังเพื่อดูว่าอยู่วงจรไหน เฟสไหน',
+  dp_pow:'กำลังไฟ', dp_cur:'กระแส', dp_ckt:'อยู่วงจร', dp_share:'ใช้วงจรร่วมกับ',
+  dp_cktload:'โหลดรวมของวงจร', dp_phase:'เฟส',
+  legendpwr:'💡 กด <b>ดูตามเฟส</b> เพื่อดูการแบ่ง 3 เฟส · กด <b>ดูตามวงจร</b> เพื่อดูว่าโมดูลไหนอยู่วงจรเดียวกัน (สีเดียวกัน = เบรกเกอร์ตัวเดียวกัน)',
+  opts:c=>'<div class="opt pick"><div class="t">A · 3 เฟส แบ่งโซน <span class="tag">แนะนำ</span></div><ul>'
+    +'<li>ตู้ย่อย <b>3 ตู้</b> วางใกล้จอ: L1=A–D, L2=E–H, L3=I–L</li>'
+    +'<li>แต่ละตู้มี <b>'+(c.totalCkt/3)+' วงจร × '+PWR.brk+'A</b> · เดินสายสั้น หาจุดเสียง่าย</li>'
+    +'<li>ข้อเสีย: ถ้าเฟสไหนดับ <b>จอดับเป็นแถบ 1/3</b> ทันที</li>'
+    +'<li>เหมาะกับงานถาวร/งานที่วางตู้ไฟใกล้จอได้</li></ul></div>'
+    +'<div class="opt"><div class="t">B · 3 เฟส สลับคอลัมน์</div><ul>'
+    +'<li>ไล่เฟสสลับ A=L1, B=L2, C=L3, D=L1 …</li>'
+    +'<li>ถ้าเฟสดับ ภาพ<b>ดับเป็นริ้วกระจาย</b> ยังพอเห็นภาพรวม ไม่หายทั้งแถบ</li>'
+    +'<li>ข้อเสีย: เดินสายไกลกว่า ตู้ไฟต้องกระจายสายข้ามคอลัมน์</li>'
+    +'<li>เหมาะกับงานโชว์ที่ห้ามภาพหายเป็นก้อนใหญ่</li></ul></div>'
+    +'<div class="opt"><div class="t">C · PDU ประจำคอลัมน์ (12 ตู้)</div><ul>'
+    +'<li>PDU เล็ก 1 ตัว/คอลัมน์ รับไฟจากเมน แล้วแตก <b>'+c.cktPerCol+' วงจร</b> ในตัว</li>'
+    +'<li>ถอด/ย้ายทีละคอลัมน์ได้ · เหมาะกับงาน<b>ทัวร์/ติดตั้งชั่วคราว</b></li>'
+    +'<li>วัดกระแสแยกรายคอลัมน์ได้ถ้าใช้ PDU แบบมีมิเตอร์</li>'
+    +'<li>ข้อเสีย: อุปกรณ์เยอะ ราคาสูงกว่า</li></ul></div>',
+  legend3d:'💡 <b>1 แท่ง = 1 โมดูล</b> (50×50cm) ข้างในมี <b>6×6×48 = 1,728 pixel</b> — คลิกแท่งเพื่อเห็นเม็ดจริง · คลิก chip คอลัมน์เพื่อ highlight ทั้งคอลัมน์ (= 1 IP)',
+  empty:'👆 คลิกโมดูลบนแผนผัง<br>หรือค้นหาจากเลข universe ด้านล่าง',
+  empty3d:'👆 คลิกแท่งโมดูลใน 3D<br>เพื่อดู IP และช่วง Universe',
+  findlabel:'🔎 ค้นหาจากเลข Universe (1–1584)',
+  findbtn:'หา', finderr:'ใส่เลข 1–1584',
+  findmsg:(u,m,ip)=>'U'+u+' อยู่ในโมดูล '+m+' ('+ip+')',
+  in_t:'Input', in_d:'Touchscreen Display · MIDI Controller',
+  main_d:'Realtime Render · Motion Graphic (TouchDesigner)<br>รับ input ควบคุม + render ภาพ volume',
+  mgmt_d:'รับภาพ NDI → <b style="color:var(--txt)">multi-core process</b> แปลงเป็น Art-Net<br>แตกงานตาม column (12 worker) → ยิงขนาน',
+  artnet_lb:'Art-Net (unicast ไปตาม IP)',
+  note:'💡 <b>จุดสำคัญ:</b> Main PC ไม่ยิง Art-Net เอง (เลี่ยงคอขวด CPU ใน TD) — ส่งภาพผ่าน NDI ให้ Management PC ที่แตกงานเป็นหลาย process/core แล้วยิง <b>unicast</b> ตรงไปยัง IP ของแต่ละ column (อย่า broadcast — port โมดูลจะจม) · แนะนำแนบ sync frame (ArtSync) ให้ทุก column latch พร้อมกัน',
+  th_mod:'Module', th_ip:'IP (column)', th_uni:'Universe', th_px:'Pixel', th_ch:'Channel', th_pos:'ตำแหน่ง (col,row)',
+  searchph:'ค้นหา... เช่น B7, 2.0.0.105, 512', allbtn:'ทั้งหมด',
+  d_ip:c=>'IP (คอลัมน์ '+c+')', d_uni:'Universe', d_px:'Pixel', d_ch:'Channel',
+  d_size:'ขนาดจริง', d_pos:'ตำแหน่ง', d_posval:(c,r)=>'คอลัมน์ '+c+' · แถว '+r,
+  footer1:'LED Matrix 6m×6m · 1 module = 50×50cm · 6×6×48 px · สร้างโดย Claude Code · 2026-07-01',
+},
+en:{
+  sub:'Interactive map of the 144-module volumetric LED wall (12 columns A–L × 12 rows) — click a module to see its IP and universe range · each module 6×6×48 = 1,728 pixels = 11 universes',
+  tab2d:'📋 2D Map', tab3d:'🧊 3D Simulation',
+  sec1:'Module Map — click for details',
+  sec2:'System Architecture — 2 PCs',
+  sec3:'All Modules Table (144)',
+  sec3d:'3D Simulation — 144 module pillars (6×6×48 pixels each)',
+  hint3d:'🖱️ drag to rotate · scroll to zoom · click to select a module — the selected one gets a white frame + full 6×6×48 pixel detail',
+  rot:'Auto-rotate', pix:'Show selected module pixels (6×6×48)',
+  vwlabel:'View:', vwpersp:'Perspective', vwtop:'Top', vwfront:'Front',
+  tabwire:'🔌 Cabinet Wiring',
+  secwire:'Cabinet Wiring — Data & Power daisy-chains, 12 runs (one per column)',
+  hintwire:'🖱️ drag to rotate · scroll to zoom · click a cabinet on top to select — data cables (green, animated) run row 1 → 12 in each column',
+  wcab:'Show cabinets (top)', wdata:'Data cables (green)', wpow:'Power cables (red)', wled:'Show LED volume',
+  legendwire:'💡 <b>Data:</b> Management PC → cabinet row 1 → 2 → … → 12 (daisy-chain · 11U/module · 132U/column = 1 IP) · <b>Power:</b> distributed along the same column · 12 independent straight runs, matching the real install',
+  tabpower:'⚡ Power',
+  secpwr1:'Load calculator — adjust and see results live',
+  secpwr2:'Circuit / phase layout on the actual wall',
+  secpwr3:'Distribution diagram + circuit schedule',
+  secpwr4:'Workable power system options',
+  secpwr5:'3D cable routing — where each run goes, how many amps, where the breakers sit',
+  secpwr6:'Data ↔ Power alignment — simulate a circuit failure',
+  p_dtop:'Data topology', p_fail:'Simulate failure (this circuit in every column)',
+  dt_chain:'A · One 12-module chain per column (current)',
+  dt_match:'B · Split chains to match power circuits',
+  dt_bypass:'C · Long chain + data bypass relay',
+  fail_none:'All healthy',
+  fs_ok:'Working', fs_dead:'Dead (no power)', fs_dark:'Dark (powered, no data)', fs_lost:'Image lost',
+  faillegend:'💡 <b>The case you flagged:</b> a "dark" module is <b>still drawing power but showing nothing</b>, because the data chain was cut upstream — the confusing one on site, since power looks fine. Switch the data topology and trigger a failure to see the difference.',
+  fw_none:'✅ Everything healthy — press C1 / C2 / C3 to see what each circuit failure costs you',
+  fw_dark:(dark,dead)=>'🚨 <b>'+dead+' modules lost power, but '+(dark+dead)+' modules go black</b> — the other <b>'+dark+' still have power yet no data</b> (chain cut upstream). This is the hardest fault to diagnose on site.',
+  fw_clean:dead=>'✅ <b>Only the '+dead+' modules that actually lost power go dark</b> — nothing is left powered-but-black. Power and data boundaries line up, so the fault is obvious.',
+  tc_opt:'Data topology', tc_worst:'Worst case (image lost)', tc_dark:'Powered-but-black', tc_port:'Ports needed', tc_notehdr:'Notes',
+  tc_chain:'A · 12-module chain', tc_match:'B · Match power circuits', tc_bypass:'C · Bypass relay', tc_percol:'column',
+  tc_note:k=>({
+    chain12:'Fewest ports, but losing the first circuit kills the whole column',
+    match:'Power and data boundaries align — easiest to diagnose, at 3× the ports',
+    bypass:'Best if your cabinets support it — data keeps passing through an unpowered unit (check the spec)'
+  }[k]),
+  hintpwr3d:'🖱️ drag to rotate · scroll to zoom · click a cabinet to trace the circuit feeding it (its run turns white) · cable thickness = actual current',
+  p_phfilter:'Filter phase (one at a time reads clearest)', phf_all:'All phases',
+  p_lbl:'Show figures on runs (A / mm²)', p_brkshow:'Show breakers', p_ledshow:'Show LED volume',
+  p3_main:'3-phase main', p3_sub:'Sub-panel', p3_brk:'breakers',
+  legendpwr3d:'💡 <b>Path:</b> main panel (floor) → riser → 3 sub-panels on the truss → branch circuits out to each column → drop into the cabinets<br><b>Breakers:</b> the large ones sit in the main panel (one per phase), the small square markers are the branch breakers in each <b>sub-panel</b> — keeping them on the truss near the wall keeps branch runs short and voltage drop low',
+  p_wsqm:'Power per square metre', p_load:'Load level (average brightness)', p_pf:'Power factor',
+  p_volt:'Voltage (phase-neutral)', p_brk:'Branch breaker', p_lay:'Phase arrangement',
+  lay_block:'Zoned (A-D/E-H/I-L)', lay_inter:'Interleaved (A,B,C cycling)',
+  m_phase:'By phase', m_circuit:'By circuit',
+  ps_totmax:'Total power (full white)', ps_totnow:'Power at current load',
+  ps_mod:'Per module', ps_col:'Per column (12 modules)',
+  ps_modckt:'Modules per circuit', ps_ckt:'Total branch circuits',
+  ps_iphase:'Current per phase', ps_iphase_sub:'(3-phase)',
+  ps_main:'Recommended main breaker', ps_main_sub:'per phase',
+  u_modules:'modules', u_circuits:'circuits',
+  w_col:(a,n,b)=>'🚨 <b>One column draws '+a+' A</b> — you cannot daisy-chain all 12 modules on a single feed. Split it into <b>'+n+' circuits × '+b+' A</b> per column.',
+  w_phase:(a,b,w)=>'⚡ This needs <b>3-phase power</b> — each phase carries <b>'+a+' A</b> → main breaker <b>'+b+' A/phase</b> · roughly <b>'+w+' mm²</b> copper feeders (your electrician must size for the real run length and installation method).',
+  w_single:a=>'ℹ️ On a single phase this would draw <b>'+a+' A</b>, far beyond a normal supply — not recommended.',
+  w_inrush:'✅ <b>Inrush current:</b> LED power supplies spike 10–20× at switch-on → stagger the power-up in stages, or use PSUs with soft-start, otherwise breakers will trip on turn-on.',
+  lg_block:i=>['Columns A–D','Columns E–H','Columns I–L'][i],
+  lg_inter:i=>['Columns A,D,G,J','Columns B,E,H,K','Columns C,F,I,L'][i],
+  lg_ckt:(n,m,tot)=>'<div class="chip">'+n+' circuits per column · '+m+' modules each · '+tot+' circuits total</div>',
+  ct_id:'Circuit', ct_ph:'Phase', ct_col:'Column', ct_mod:'Modules', ct_w:'Power', ct_a:'Current', ct_brk:'Breaker / cable',
+  fd_main:'3-phase main panel', fd_box:'Sub-panel',
+  empty_p:'👆 Click a module to see which circuit and phase it belongs to',
+  dp_pow:'Power', dp_cur:'Current', dp_ckt:'On circuit', dp_share:'Shares circuit with',
+  dp_cktload:'Circuit total load', dp_phase:'Phase',
+  legendpwr:'💡 Switch to <b>By phase</b> to see the 3-phase split · <b>By circuit</b> shows which modules share a breaker (same colour = same circuit)',
+  opts:c=>'<div class="opt pick"><div class="t">A · 3-phase, zoned <span class="tag">recommended</span></div><ul>'
+    +'<li><b>3 sub-panels</b> near the wall: L1=A–D, L2=E–H, L3=I–L</li>'
+    +'<li>Each panel holds <b>'+(c.totalCkt/3)+' circuits × '+PWR.brk+'A</b> · short cable runs, easy fault-finding</li>'
+    +'<li>Downside: losing a phase kills <b>a third of the wall</b> in one block</li>'
+    +'<li>Best for permanent installs where panels can sit close to the wall</li></ul></div>'
+    +'<div class="opt"><div class="t">B · 3-phase, interleaved columns</div><ul>'
+    +'<li>Phases cycle across columns: A=L1, B=L2, C=L3, D=L1 …</li>'
+    +'<li>Losing a phase leaves <b>scattered stripes</b> — the image still reads overall</li>'
+    +'<li>Downside: longer runs, feeders must cross between columns</li>'
+    +'<li>Best for shows where a large solid blackout is unacceptable</li></ul></div>'
+    +'<div class="opt"><div class="t">C · One PDU per column (12 units)</div><ul>'
+    +'<li>A small PDU per column takes the feed and splits <b>'+c.cktPerCol+' circuits</b> internally</li>'
+    +'<li>Strike or move column by column · ideal for <b>touring / temporary rigs</b></li>'
+    +'<li>Metered PDUs give you per-column current readings</li>'
+    +'<li>Downside: more hardware, higher cost</li></ul></div>',
+  legend3d:'💡 <b>1 pillar = 1 module</b> (50×50cm) containing <b>6×6×48 = 1,728 pixels</b> — click a pillar to see the real dots · click a column chip to highlight the whole column (= 1 IP)',
+  empty:'👆 Click a module on the map<br>or look up by universe number below',
+  empty3d:'👆 Click a pillar in 3D<br>to see its IP and universe range',
+  findlabel:'🔎 Find by Universe number (1–1584)',
+  findbtn:'Find', finderr:'Enter 1–1584',
+  findmsg:(u,m,ip)=>'U'+u+' is in module '+m+' ('+ip+')',
+  in_t:'Input', in_d:'Touchscreen Display · MIDI Controller',
+  main_d:'Realtime Render · Motion Graphic (TouchDesigner)<br>receives control input + renders the volume image',
+  mgmt_d:'Receives NDI frames → <b style="color:var(--txt)">multi-core processing</b> to Art-Net<br>split by column (12 workers) → parallel output',
+  artnet_lb:'Art-Net (unicast per IP)',
+  note:'💡 <b>Key point:</b> the Main PC never sends Art-Net itself (avoids the TD CPU bottleneck) — it streams frames over NDI to the Management PC, which converts on multiple processes/cores and sends <b>unicast</b> straight to each column IP (never broadcast — module ports would drown) · attach a sync frame (ArtSync) so all columns latch together',
+  th_mod:'Module', th_ip:'IP (column)', th_uni:'Universe', th_px:'Pixels', th_ch:'Channels', th_pos:'Position (col,row)',
+  searchph:'Search... e.g. B7, 2.0.0.105, 512', allbtn:'All',
+  d_ip:c=>'IP (column '+c+')', d_uni:'Universe', d_px:'Pixels', d_ch:'Channels',
+  d_size:'Physical size', d_pos:'Position', d_posval:(c,r)=>'Column '+c+' · Row '+r,
+  footer1:'LED Matrix 6m×6m · 1 module = 50×50cm · 6×6×48 px · Built by Claude Code · 2026-07-01',
+},
+zh:{
+  sub:'6m×6m 体积式 LED 屏 144 模块交互图（12 列 A–L × 12 行）— 点击模块查看 IP 与 Universe 范围 · 每模块 6×6×48 = 1,728 像素 = 11 个 Universe',
+  tab2d:'📋 2D 平面图', tab3d:'🧊 3D 模拟',
+  sec1:'模块布局图 — 点击查看详情',
+  sec2:'系统架构 — 2 台电脑',
+  sec3:'全部模块表（144）',
+  sec3d:'3D 模拟 — 144 根模块柱（每根 6×6×48 像素）',
+  hint3d:'🖱️ 拖动旋转 · 滚轮缩放 · 点击选择模块 — 所选模块显示白色边框 + 完整 6×6×48 像素点',
+  rot:'自动旋转', pix:'显示所选模块的像素点 (6×6×48)',
+  vwlabel:'视角：', vwpersp:'透视', vwtop:'顶视', vwfront:'正视',
+  tabwire:'🔌 机柜接线',
+  secwire:'机柜接线 — Data 与电源菊花链，共 12 组（每列一组）',
+  hintwire:'🖱️ 拖动旋转 · 滚轮缩放 · 点击顶部机柜选择模块 — 数据线（绿色·流动）沿每列第 1 → 12 行连接',
+  wcab:'显示机柜（顶部）', wdata:'数据线（绿）', wpow:'电源线（红）', wled:'显示 LED 体块',
+  legendwire:'💡 <b>Data：</b>Management PC → 第 1 行机柜 → 2 → … → 12（菊花链 · 每模块 11U · 每列 132U = 1 个 IP）· <b>电源：</b>沿同列供电 · 共 12 组独立链路，与现场一致直线连接',
+  tabpower:'⚡ 供电系统',
+  secpwr1:'负载计算器 — 调整参数即时查看结果',
+  secpwr2:'实际屏体上的回路 / 相位划分',
+  secpwr3:'配电示意图 + 回路清单',
+  secpwr4:'可行的供电方案',
+  secpwr5:'3D 布线模拟 — 每路线缆走向、电流大小、断路器位置',
+  secpwr6:'Data ↔ 电源一致性 — 断电故障模拟',
+  p_dtop:'Data 连接方式', p_fail:'模拟断电（各列的该回路）',
+  dt_chain:'A · 每列一条 12 模块串联（当前）',
+  dt_match:'B · 拆分串联使其与电源回路一致',
+  dt_bypass:'C · 长串联 + 数据旁路继电器',
+  fail_none:'供电正常',
+  fs_ok:'正常', fs_dead:'熄灭（无电）', fs_dark:'黑屏（有电无信号）', fs_lost:'画面缺失',
+  faillegend:'💡 <b>您担心的情况：</b>"黑屏"模块<b>仍在耗电但不显示</b>，因为上游数据链路被切断 — 现场最难排查，因为供电看起来完全正常。切换 data 连接方式并触发故障即可看出差异。',
+  fw_none:'✅ 系统正常 — 点击 C1 / C2 / C3 模拟各回路断电的后果',
+  fw_dark:(dark,dead)=>'🚨 <b>'+dead+' 个模块失电，但共有 '+(dark+dead)+' 个模块黑屏</b> — 另外 <b>'+dark+' 个仍有电却无数据</b>（上游链路中断）· 这是现场最难定位的故障',
+  fw_clean:dead=>'✅ <b>仅失电的 '+dead+' 个模块熄灭</b> — 没有"有电却黑屏"的模块，电源与数据边界一致，故障一目了然',
+  tc_opt:'Data 方式', tc_worst:'最坏情况（画面缺失）', tc_dark:'有电却黑屏', tc_port:'所需端口', tc_notehdr:'说明',
+  tc_chain:'A · 12 模块串联', tc_match:'B · 与电源回路一致', tc_bypass:'C · 旁路继电器', tc_percol:'列',
+  tc_note:k=>({
+    chain12:'端口最省，但首个回路失电将导致整列熄灭',
+    match:'电源与数据边界一致，排障最容易，但端口需增至 3 倍',
+    bypass:'若机柜支持则最佳 — 失电模块仍可透传数据（需确认规格）'
+  }[k]),
+  hintpwr3d:'🖱️ 拖动旋转 · 滚轮缩放 · 点击机柜可追踪为其供电的回路（线缆变白）· 线缆粗细 = 实际电流',
+  p_phfilter:'相位筛选（单相查看最清晰）', phf_all:'全部相位',
+  p_lbl:'显示线路数值 (A / mm²)', p_brkshow:'显示断路器', p_ledshow:'显示 LED 体块',
+  p3_main:'三相主柜', p3_sub:'分配电箱', p3_brk:'断路器',
+  legendpwr3d:'💡 <b>路径：</b>主配电柜（地面）→ 上行主干 → 桁架上 3 个分配电箱 → 分支回路引至各列 → 下引至机柜<br><b>断路器：</b>主柜内为每相大断路器，分配电箱旁的小方块为各分支断路器 — 装在靠近屏体的桁架上可缩短分支线路、降低压降',
+  p_wsqm:'每平方米功率', p_load:'负载水平（平均亮度）', p_pf:'功率因数',
+  p_volt:'电压（相-零）', p_brk:'分支断路器', p_lay:'相位排布方式',
+  lay_block:'分区（A-D/E-H/I-L）', lay_inter:'交错（A,B,C 循环）',
+  m_phase:'按相位查看', m_circuit:'按回路查看',
+  ps_totmax:'总功率（全白）', ps_totnow:'当前负载功率',
+  ps_mod:'每个模块', ps_col:'每列（12 模块）',
+  ps_modckt:'每回路模块数', ps_ckt:'分支回路总数',
+  ps_iphase:'每相电流', ps_iphase_sub:'（三相）',
+  ps_main:'建议主断路器', ps_main_sub:'每相',
+  u_modules:'模块', u_circuits:'回路',
+  w_col:(a,n,b)=>'🚨 <b>单列电流达 '+a+' A</b> — 12 个模块无法串在同一路供电，必须拆成<b>每列 '+n+' 个回路 × '+b+' A</b>',
+  w_phase:(a,b,w)=>'⚡ 必须使用<b>三相电</b> — 每相承担 <b>'+a+' A</b> → 主断路器 <b>'+b+' A/相</b>· 主干线约 <b>'+w+' mm²</b> 铜缆（须由电气工程师按实际长度与敷设方式核算）',
+  w_single:a=>'ℹ️ 若使用单相将达 <b>'+a+' A</b>，远超常规供电能力 — 不建议',
+  w_inrush:'✅ <b>浪涌电流：</b>LED 电源开机瞬间可达额定的 10–20 倍 → 需分组顺序上电，或采用带软启动的电源，否则开机即跳闸',
+  lg_block:i=>['A–D 列','E–H 列','I–L 列'][i],
+  lg_inter:i=>['A,D,G,J 列','B,E,H,K 列','C,F,I,L 列'][i],
+  lg_ckt:(n,m,tot)=>'<div class="chip">每列 '+n+' 个回路 · 每回路 '+m+' 个模块 · 共 '+tot+' 个回路</div>',
+  ct_id:'回路', ct_ph:'相位', ct_col:'列', ct_mod:'模块', ct_w:'功率', ct_a:'电流', ct_brk:'断路器 / 线缆',
+  fd_main:'三相主配电柜', fd_box:'分配电箱',
+  empty_p:'👆 点击模块查看其所属回路与相位',
+  dp_pow:'功率', dp_cur:'电流', dp_ckt:'所属回路', dp_share:'同回路模块',
+  dp_cktload:'回路总负载', dp_phase:'相位',
+  legendpwr:'💡 点<b>按相位查看</b>了解三相划分 · 点<b>按回路查看</b>可看出哪些模块共用一个断路器（同色 = 同回路）',
+  opts:c=>'<div class="opt pick"><div class="t">A · 三相分区 <span class="tag">推荐</span></div><ul>'
+    +'<li>屏体附近设 <b>3 个分配电箱</b>：L1=A–D，L2=E–H，L3=I–L</li>'
+    +'<li>每箱 <b>'+(c.totalCkt/3)+' 个回路 × '+PWR.brk+'A</b> · 走线短、排障快</li>'
+    +'<li>缺点：某相失电将导致<b>整块 1/3 屏幕熄灭</b></li>'
+    +'<li>适合固定安装、配电箱可靠近屏体的场景</li></ul></div>'
+    +'<div class="opt"><div class="t">B · 三相交错排布</div><ul>'
+    +'<li>相位按列循环：A=L1，B=L2，C=L3，D=L1 …</li>'
+    +'<li>某相失电时呈<b>分散条纹</b>，画面整体仍可辨识</li>'
+    +'<li>缺点：走线较长，需跨列布线</li>'
+    +'<li>适合不允许出现大面积黑块的演出</li></ul></div>'
+    +'<div class="opt"><div class="t">C · 每列一台 PDU（共 12 台）</div><ul>'
+    +'<li>每列一台小型 PDU 接入主电，内部分出 <b>'+c.cktPerCol+' 个回路</b></li>'
+    +'<li>可按列拆装转移 · 适合<b>巡演 / 临时搭建</b></li>'
+    +'<li>选带计量的 PDU 可分列监测电流</li>'
+    +'<li>缺点：设备数量多、成本较高</li></ul></div>',
+  legend3d:'💡 <b>1 根柱 = 1 个模块</b>（50×50cm）内含 <b>6×6×48 = 1,728 像素</b> — 点击柱体查看真实像素点 · 点击列标签可高亮整列（= 1 个 IP）',
+  empty:'👆 点击上方模块<br>或在下方按 Universe 编号查找',
+  empty3d:'👆 点击 3D 中的柱体<br>查看其 IP 与 Universe 范围',
+  findlabel:'🔎 按 Universe 编号查找 (1–1584)',
+  findbtn:'查找', finderr:'请输入 1–1584',
+  findmsg:(u,m,ip)=>'U'+u+' 位于模块 '+m+'（'+ip+'）',
+  in_t:'输入', in_d:'触摸屏 · MIDI 控制器',
+  main_d:'实时渲染 · 动态图形 (TouchDesigner)<br>接收控制输入 + 渲染体积图像',
+  mgmt_d:'接收 NDI 图像 → <b style="color:var(--txt)">多核处理</b>转换为 Art-Net<br>按列拆分（12 个 worker）→ 并行发送',
+  artnet_lb:'Art-Net（按 IP 单播）',
+  note:'💡 <b>关键点：</b>Main PC 不直接发送 Art-Net（避免 TD 的 CPU 瓶颈）— 通过 NDI 把图像发给 Management PC，由其多进程/多核转换后<b>单播</b>到各列 IP（切勿广播 — 模块端口会被淹没）· 建议附加同步帧 (ArtSync) 让所有列同时锁存',
+  th_mod:'模块', th_ip:'IP（列）', th_uni:'Universe', th_px:'像素', th_ch:'通道', th_pos:'位置（列,行）',
+  searchph:'搜索… 例如 B7、2.0.0.105、512', allbtn:'全部',
+  d_ip:c=>'IP（'+c+' 列）', d_uni:'Universe', d_px:'像素', d_ch:'通道',
+  d_size:'实际尺寸', d_pos:'位置', d_posval:(c,r)=>c+' 列 · 第 '+r+' 行',
+  footer1:'LED Matrix 6m×6m · 1 模块 = 50×50cm · 6×6×48 px · 由 Claude Code 制作 · 2026-07-01',
+}};
+let LANG='th';
+const T=()=>I18N[LANG];
+
+/* ===== data ===== */
+const COLS=[
+  {l:'A',ip:'2.0.0.101',c:'#f23b3b',tc:'#fff'},
+  {l:'B',ip:'2.0.0.102',c:'#f97a16',tc:'#fff'},
+  {l:'C',ip:'2.0.0.103',c:'#fbd44c',tc:'#3a2c05'},
+  {l:'D',ip:'2.0.0.104',c:'#7ec84a',tc:'#12300a'},
+  {l:'E',ip:'2.0.0.105',c:'#4dd7c9',tc:'#0a2f2b'},
+  {l:'F',ip:'2.0.0.106',c:'#38b6ff',tc:'#062a44'},
+  {l:'G',ip:'2.0.0.107',c:'#3b6fd4',tc:'#fff'},
+  {l:'H',ip:'2.0.0.108',c:'#7c4dff',tc:'#fff'},
+  {l:'I',ip:'2.0.0.109',c:'#b967d9',tc:'#fff'},
+  {l:'J',ip:'2.0.0.110',c:'#f65fc0',tc:'#fff'},
+  {l:'K',ip:'2.0.0.111',c:'#f9b8a6',tc:'#4a1d10'},
+  {l:'L',ip:'2.0.0.112',c:'#8a5a2b',tc:'#fff'},
+];
+const U_PER_MOD=11, ROWS=12, PX=1728, CH=5184;
+function uStart(ci,row){return ci*132+(row-1)*U_PER_MOD+1;}
+function modInfo(ci,row){
+  const s=uStart(ci,row);
+  return {name:COLS[ci].l+row, ci, row, ip:COLS[ci].ip, us:s, ue:s+U_PER_MOD-1, col:COLS[ci]};
+}
+function hex2rgb(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+
+/* ===== build 2D grid ===== */
+const matrix=document.getElementById('matrix');
+let html='<div class="mhead"></div>';
+for(const c of COLS) html+='<div class="mhead">'+c.l+'</div>';
+for(let row=ROWS;row>=1;row--){
+  html+='<div class="rowlab">'+row+'</div>';
+  for(let ci=0;ci<12;ci++){
+    const m=modInfo(ci,row);
+    html+='<div class="module" id="m_'+m.name+'" data-ci="'+ci+'" data-row="'+row+'" style="background:'+m.col.c+';color:'+m.col.tc+'" title="'+m.name+' · U'+m.us+'–'+m.ue+'">'+m.name+'</div>';
+  }
+}
+matrix.innerHTML=html;
+
+/* column hint chips (both tabs) */
+const chipHTML=COLS.map((c,i)=>
+  '<div class="chip" data-ci="'+i+'"><span class="sw" style="background:'+c.c+'"></span>'+c.l+' · '+c.ip+'</div>').join('');
+document.getElementById('colHint').innerHTML=chipHTML;
+document.getElementById('colHint3d').innerHTML=chipHTML;
+
+/* fan */
+document.getElementById('fan').innerHTML=COLS.map((c,i)=>
+  '<div class="f" data-ci="'+i+'" style="background:'+c.c+';color:'+c.tc+'">'+c.l+'<small>'+c.ip+'</small><small>U'+(i*132+1)+'–'+(i*132+132)+'</small></div>').join('');
+
+/* ===== table ===== */
+const tbody=document.getElementById('tbody');
+let trows='';
+for(let ci=0;ci<12;ci++){
+  for(let row=1;row<=ROWS;row++){
+    const m=modInfo(ci,row);
+    trows+='<tr id="t_'+m.name+'" data-ci="'+ci+'" data-row="'+row+'" data-search="'+(m.name+' '+m.ip+' '+m.us+' '+m.ue).toLowerCase()+'">'
+      +'<td><span class="msw" style="background:'+m.col.c+'"></span><b>'+m.name+'</b></td>'
+      +'<td class="mono">'+m.ip+'</td>'
+      +'<td class="mono">U '+m.us+' – '+m.ue+'</td>'
+      +'<td>'+PX.toLocaleString()+'</td>'
+      +'<td>'+CH.toLocaleString()+'</td>'
+      +'<td>'+m.col.l+' , '+row+'</td></tr>';
+  }
+}
+tbody.innerHTML=trows;
+
+/* filter buttons per column */
+const tbar=document.getElementById('tbar');
+COLS.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.className='fbtn';b.dataset.f=c.l;b.textContent=c.l;
+  b.style.borderLeft='3px solid '+c.c;
+  tbar.appendChild(b);
+});
+
+/* ===== selection (no page jumping) ===== */
+let selCi=null, selRow=null;
+function scrollTableToRow(tr){
+  const sc=document.getElementById('tscroll');
+  const d=tr.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+  sc.scrollTop += d - sc.clientHeight/2 + tr.clientHeight/2;
+}
+function renderDetail(){
+  const t=T();
+  let inner;
+  if(selCi===null){
+    document.getElementById('dcard').innerHTML='<div class="empty">'+t.empty+'</div>';
+    document.getElementById('dcard3d').innerHTML='<div class="empty">'+t.empty3d+'</div>';
+    const dw0=document.getElementById('dcardw');
+    if(dw0)dw0.innerHTML='<div class="empty">'+t.empty3d+'</div>';
+    return;
+  }
+  const m=modInfo(selCi,selRow);
+  inner=
+    '<h3><span class="sw" style="background:'+m.col.c+'"></span>Module '+m.name+'</h3>'
+    +'<div class="kv">'
+    +'<div class="k">'+t.d_ip(m.col.l)+'</div><div class="v mono">'+m.ip+'</div>'
+    +'<div class="k">'+t.d_uni+'</div><div class="v mono">U '+m.us+' – '+m.ue+' <span style="color:var(--muted);font-weight:400">(11 U)</span></div>'
+    +'<div class="k">'+t.d_px+'</div><div class="v">'+PX.toLocaleString()+' <span style="color:var(--muted);font-weight:400">(6×6×48)</span></div>'
+    +'<div class="k">'+t.d_ch+'</div><div class="v">'+CH.toLocaleString()+'</div>'
+    +'<div class="k">'+t.d_size+'</div><div class="v">50 × 50 cm</div>'
+    +'<div class="k">'+t.d_pos+'</div><div class="v">'+t.d_posval(m.col.l,m.row)+'</div>'
+    +'</div>';
+  document.getElementById('dcard').innerHTML=inner;
+  document.getElementById('dcard3d').innerHTML=inner;
+  const dw=document.getElementById('dcardw');
+  if(dw)dw.innerHTML=inner;
+  const dp3=document.getElementById('dcardp3');
+  if(dp3)dp3.innerHTML=inner;
+  if(typeof renderDetailP==='function')renderDetailP();
+}
+function select(ci,row,syncTable){
+  if(selCi!==null){
+    const pName=COLS[selCi].l+selRow;
+    document.getElementById('m_'+pName)?.classList.remove('sel');
+    document.getElementById('t_'+pName)?.classList.remove('sel');
+  }
+  selCi=ci; selRow=row;
+  const m=modInfo(ci,row);
+  document.getElementById('m_'+m.name)?.classList.add('sel');
+  const tr=document.getElementById('t_'+m.name);
+  if(tr){ tr.classList.add('sel'); if(syncTable) scrollTableToRow(tr); }
+  renderDetail();
+}
+matrix.addEventListener('click',e=>{
+  const el=e.target.closest('.module'); if(!el)return;
+  select(+el.dataset.ci,+el.dataset.row,true);
+});
+tbody.addEventListener('click',e=>{
+  const tr=e.target.closest('tr'); if(!tr||!tr.dataset.ci)return;
+  select(+tr.dataset.ci,+tr.dataset.row,false);
+});
+
+/* column chip & fan -> dim others */
+let dimCol=null;
+function dimExcept(ci){
+  document.querySelectorAll('.module').forEach(el=>{
+    el.classList.toggle('dimmed', ci!==null && +el.dataset.ci!==ci);
+  });
+}
+function toggleDim(ci){ dimCol=(dimCol===ci)?null:ci; dimExcept(dimCol); }
+document.getElementById('colHint').addEventListener('click',e=>{const ch=e.target.closest('.chip');if(ch)toggleDim(+ch.dataset.ci);});
+document.getElementById('colHint3d').addEventListener('click',e=>{const ch=e.target.closest('.chip');if(ch)toggleDim(+ch.dataset.ci);});
+document.getElementById('fan').addEventListener('click',e=>{const f=e.target.closest('.f');if(f)toggleDim(+f.dataset.ci);});
+
+/* universe finder */
+function findU(){
+  const u=+document.getElementById('uFind').value;
+  const msg=document.getElementById('uMsg');
+  if(!u||u<1||u>1584){msg.textContent=T().finderr;return;}
+  const u0=u-1, ci=Math.floor(u0/132), row=Math.floor((u0%132)/U_PER_MOD)+1;
+  msg.textContent=T().findmsg(u,COLS[ci].l+row,COLS[ci].ip);
+  select(ci,row,true);
+}
+document.getElementById('uBtn').addEventListener('click',findU);
+document.getElementById('uFind').addEventListener('keydown',e=>{if(e.key==='Enter')findU();});
+
+/* table search + filter */
+let colFilter='ALL';
+function applyTable(){
+  const q=document.getElementById('tSearch').value.trim().toLowerCase();
+  document.querySelectorAll('#tbody tr').forEach(tr=>{
+    const okCol = colFilter==='ALL' || tr.id[2]===colFilter;
+    const okQ = !q || tr.dataset.search.includes(q);
+    tr.style.display=(okCol&&okQ)?'':'none';
+  });
+}
+document.getElementById('tSearch').addEventListener('input',applyTable);
+tbar.addEventListener('click',e=>{
+  const b=e.target.closest('.fbtn'); if(!b)return;
+  tbar.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); colFilter=b.dataset.f; applyTable();
+});
+
+/* ================= 3D SIMULATION ================= */
+const c3=document.getElementById('c3d'), x3=c3.getContext('2d');
+let W3=0,H3=0,DPR3=1;
+const S3={yaw:0.6,pitch:-0.52,zoom:1,drag:false,lx:0,ly:0,auto:false,showPix:true,t:0};
+const PITCH=6, HALF=3, MH=48;                 /* modules touching (seamless, like the real wall) */
+const CAMD=185;
+function resize3(){
+  DPR3=Math.min(window.devicePixelRatio||1,2);
+  W3=c3.clientWidth; H3=c3.clientHeight;
+  if(W3===0)return;
+  c3.width=W3*DPR3; c3.height=H3*DPR3;
+  x3.setTransform(DPR3,0,0,DPR3,0,0);
+}
+window.addEventListener('resize',resize3);
+function wx(ci){return (ci-5.5)*PITCH;}
+function wz(row){return (6.5-row)*PITCH;}   /* row 1 = front, row 12 = back */
+function proj3(px,py,pz){
+  const cy=Math.cos(S3.yaw),sy=Math.sin(S3.yaw),cx=Math.cos(S3.pitch),sx=Math.sin(S3.pitch);
+  let x=px, y=py-MH/2, z=pz;
+  let x1=x*cy - z*sy, z1=x*sy + z*cy;
+  let y1=y*cx - z1*sx, z2=y*sx + z1*cx;
+  const f=Math.min(W3,H3)*1.5*S3.zoom;
+  const s=f/(CAMD - z2);
+  return [W3/2 + x1*s, H3/2 - y1*s, s, z2];
+}
+/* box faces: corner idx (y0=bottom, y1=top) */
+const FACES=[
+  {idx:[3,2,6,7],k:1.00},   /* top */
+  {idx:[0,1,2,3],k:0.55},   /* z0 side */
+  {idx:[4,5,6,7],k:0.55},   /* z1 side */
+  {idx:[0,3,7,4],k:0.74},   /* x0 side */
+  {idx:[1,2,6,5],k:0.74},   /* x1 side */
+];
+let pickMap=[];
+function draw3(){
+  if(W3===0){resize3(); if(W3===0)return;}
+  x3.clearRect(0,0,W3,H3);
+  S3.t+=0.016;
+  if(S3.auto && !S3.drag) S3.yaw+=0.0035;
+
+  /* ceiling/truss grid (hanging system: cabinets on top, LED strings hang down) */
+  x3.strokeStyle='rgba(120,140,180,0.13)';x3.lineWidth=1;
+  x3.beginPath();
+  for(let i=0;i<=12;i++){
+    const x=(i-6)*PITCH;
+    let a=proj3(x,MH,-6*PITCH), b=proj3(x,MH,6*PITCH);
+    x3.moveTo(a[0],a[1]);x3.lineTo(b[0],b[1]);
+    a=proj3(-6*PITCH,MH,x); b=proj3(6*PITCH,MH,x);
+    x3.moveTo(a[0],a[1]);x3.lineTo(b[0],b[1]);
+  }
+  x3.stroke();
+
+  /* column letters + row numbers at the ceiling plane */
+  for(let ci=0;ci<12;ci++){
+    const p=proj3(wx(ci),MH+3,6.9*PITCH);
+    if(p[2]>0){
+      x3.fillStyle=COLS[ci].c;
+      x3.font='700 '+Math.max(9,Math.min(18,p[2]*3.2))+'px Segoe UI';
+      x3.textAlign='center';
+      x3.fillText(COLS[ci].l,p[0],p[1]);
+    }
+  }
+  for(let row=1;row<=12;row++){
+    const p=proj3(-6.9*PITCH,MH+3,wz(row));
+    if(p[2]>0){
+      x3.fillStyle='rgba(139,151,180,.75)';
+      x3.font='600 '+Math.max(8,Math.min(14,p[2]*2.6))+'px Segoe UI';
+      x3.textAlign='center';
+      x3.fillText(row,p[0],p[1]);
+    }
+  }
+
+  /* modules: project corners, sort far->near */
+  const mods=[];
+  for(let ci=0;ci<12;ci++){
+    for(let row=1;row<=12;row++){
+      const cx0=wx(ci)-HALF, cx1=wx(ci)+HALF, cz0=wz(row)-HALF, cz1=wz(row)+HALF;
+      const corners=[
+        [cx0,0,cz0],[cx1,0,cz0],[cx1,MH,cz0],[cx0,MH,cz0],
+        [cx0,0,cz1],[cx1,0,cz1],[cx1,MH,cz1],[cx0,MH,cz1],
+      ].map(p=>proj3(p[0],p[1],p[2]));
+      const zc=(corners[0][3]+corners[6][3])/2;
+      mods.push({ci,row,corners,zc});
+    }
+  }
+  mods.sort((a,b)=>a.zc-b.zc);
+
+  pickMap=[];
+  const selName=(selCi!==null)?COLS[selCi].l+selRow:null;
+
+  for(const md of mods){
+    const isSel = selCi===md.ci && selRow===md.row;
+    const dim = dimCol!==null && md.ci!==dimCol;
+    const rgb=hex2rgb(COLS[md.ci].c);
+    /* pick bbox + corners (for accurate face hit-test) */
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+    for(const c of md.corners){mnx=Math.min(mnx,c[0]);mxx=Math.max(mxx,c[0]);mny=Math.min(mny,c[1]);mxy=Math.max(mxy,c[1]);}
+    pickMap.push({ci:md.ci,row:md.row,mnx,mny,mxx,mxy,zc:md.zc,corners:md.corners});
+
+    const wire=()=>{                        /* white frame around selected module */
+      x3.strokeStyle='rgba(255,255,255,.95)';x3.lineWidth=1.6;
+      const E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+      x3.beginPath();
+      for(const[a,b]of E){x3.moveTo(md.corners[a][0],md.corners[a][1]);x3.lineTo(md.corners[b][0],md.corners[b][1]);}
+      x3.stroke();
+    };
+    const bx=wx(md.ci)-HALF, bz=wz(md.row)-HALF;
+    if(isSel && S3.showPix){
+      /* selected: full 6×6×48 LED dots, additive twinkle */
+      x3.globalCompositeOperation='lighter';
+      for(let iy=0;iy<48;iy++)for(let ix=0;ix<6;ix++)for(let iz=0;iz<6;iz++){
+        const p=proj3(bx+ix+0.5, iy+0.5, bz+iz+0.5);
+        if(p[2]<=0)continue;
+        const tw=0.62+0.38*Math.sin(S3.t*2.6+ix*1.7+iy*0.35+iz*2.3);
+        const sz=Math.max(1,p[2]*0.30);
+        x3.fillStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+(0.5+0.5*tw)+')';
+        x3.fillRect(p[0]-sz/2,p[1]-sz/2,sz,sz);
+      }
+      x3.globalCompositeOperation='source-over';
+      wire();
+    }else{
+      /* every module = decimated LED dots (seamless wall of pixels) */
+      const alpha=dim?0.10:0.82;
+      x3.fillStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+alpha+')';
+      for(let iy=1;iy<48;iy+=3)for(let ix=0;ix<6;ix+=2)for(let iz=0;iz<6;iz+=2){
+        const p=proj3(bx+ix+1, iy+0.5, bz+iz+1);
+        if(p[2]<=0)continue;
+        const sz=Math.max(0.8,p[2]*0.42);
+        x3.fillRect(p[0]-sz/2,p[1]-sz/2,sz,sz);
+      }
+      if(isSel)wire();
+    }
+  }
+}
+function loop3(){
+  if(document.getElementById('tab3d').style.display!=='none')draw3();
+  if(document.getElementById('tabwire').style.display!=='none')drawW();
+  requestAnimationFrame(loop3);
+}
+/* interactions */
+c3.addEventListener('pointerdown',e=>{S3.drag=true;S3.moved=false;S3.lx=e.clientX;S3.ly=e.clientY;c3.setPointerCapture(e.pointerId);});
+c3.addEventListener('pointermove',e=>{
+  if(!S3.drag)return;
+  const dx=e.clientX-S3.lx, dy=e.clientY-S3.ly;
+  if(Math.abs(dx)+Math.abs(dy)>3)S3.moved=true;
+  S3.yaw+=dx*0.008; S3.pitch-=dy*0.009;      /* drag down = tip top toward you */
+  S3.pitch=Math.max(-1.55,Math.min(0.75,S3.pitch));   /* allow looking up (hanging display) */
+  S3.lx=e.clientX;S3.ly=e.clientY;
+});
+c3.addEventListener('pointerup',()=>{S3.drag=false;});
+function pip(px,py,q){                      /* point in convex quad (screen space) */
+  let sign=0;
+  for(let i=0;i<4;i++){
+    const a=q[i],b=q[(i+1)%4];
+    const cr=(b[0]-a[0])*(py-a[1])-(b[1]-a[1])*(px-a[0]);
+    if(cr!==0){const s=cr>0?1:-1; if(sign===0)sign=s; else if(s!==sign)return false;}
+  }
+  return true;
+}
+c3.addEventListener('click',e=>{
+  if(S3.moved)return;                       /* was a drag, not a click */
+  const r=c3.getBoundingClientRect();
+  const px=e.clientX-r.left, py=e.clientY-r.top;
+  let best=null;
+  for(const p of pickMap){
+    if(px<p.mnx||px>p.mxx||py<p.mny||py>p.mxy)continue;   /* quick reject */
+    /* accurate: point must be inside one of the pillar's faces */
+    let hit=false;
+    for(const f of FACES){
+      const q=f.idx.map(i=>p.corners[i]);
+      if(pip(px,py,q)){hit=true;break;}
+    }
+    if(hit && (!best||p.zc>best.zc))best=p;  /* nearest visible wins */
+  }
+  if(best)select(best.ci,best.row,true);
+});
+c3.addEventListener('wheel',e=>{
+  e.preventDefault();
+  S3.zoom*=(e.deltaY<0?1.1:0.9);
+  S3.zoom=Math.max(0.45,Math.min(2.6,S3.zoom));
+},{passive:false});
+document.getElementById('rotChk').addEventListener('change',e=>S3.auto=e.target.checked);
+document.getElementById('pixChk').addEventListener('change',e=>S3.showPix=e.target.checked);
+
+/* view presets */
+const VIEWS={
+  persp:{yaw:0.6,  pitch:-0.52, zoom:1},
+  top:  {yaw:0.0,  pitch:-1.52, zoom:0.92},
+  front:{yaw:0.0,  pitch:-0.06, zoom:1},
+};
+document.getElementById('viewbtns').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  const v=VIEWS[b.dataset.vw]; if(!v)return;
+  S3.yaw=v.yaw; S3.pitch=v.pitch; S3.zoom=v.zoom;
+  document.querySelectorAll('#viewbtns button').forEach(x=>x.classList.toggle('on',x===b));
+});
+
+/* ================= WIRE TAB (cabinet + cables) ================= */
+const cw=document.getElementById('c3w'), xw=cw.getContext('2d');
+let WW=0,HW=0,DPRW=1,pickMapW=[];
+const SW={yaw:0.55,pitch:-0.62,zoom:0.95,drag:false,moved:false,lx:0,ly:0,t:0};
+const SHOWW={cab:true,data:true,pow:true,led:true};
+function resizeW(){
+  DPRW=Math.min(window.devicePixelRatio||1,2);
+  WW=cw.clientWidth; HW=cw.clientHeight;
+  if(WW===0)return;
+  cw.width=WW*DPRW; cw.height=HW*DPRW;
+  xw.setTransform(DPRW,0,0,DPRW,0,0);
+}
+window.addEventListener('resize',resizeW);
+function projW(px,py,pz){
+  const cy=Math.cos(SW.yaw),sy=Math.sin(SW.yaw),cx=Math.cos(SW.pitch),sx=Math.sin(SW.pitch);
+  let x=px, y=py-26, z=pz+6;
+  let x1=x*cy - z*sy, z1=x*sy + z*cy;
+  let y1=y*cx - z1*sx, z2=y*sx + z1*cx;
+  const f=Math.min(WW,HW)*1.35*SW.zoom;
+  const s=f/(210 - z2);
+  return [WW/2 + x1*s, HW/2 - y1*s, s, z2];
+}
+function boxCW(cx0,cx1,y0,y1,cz0,cz1){
+  return [
+    [cx0,y0,cz0],[cx1,y0,cz0],[cx1,y1,cz0],[cx0,y1,cz0],
+    [cx0,y0,cz1],[cx1,y0,cz1],[cx1,y1,cz1],[cx0,y1,cz1],
+  ].map(p=>projW(p[0],p[1],p[2]));
+}
+function drawBoxW(corners,rgb,alpha,topRgb){
+  const fl=FACES.map(f=>({f,z:(corners[f.idx[0]][3]+corners[f.idx[2]][3])/2})).sort((a,b)=>a.z-b.z);
+  for(const{f}of fl){
+    const q=f.idx.map(i=>corners[i]);
+    xw.beginPath();xw.moveTo(q[0][0],q[0][1]);
+    for(let i=1;i<4;i++)xw.lineTo(q[i][0],q[i][1]);
+    xw.closePath();
+    const base=(f===FACES[0]&&topRgb)?topRgb:rgb;
+    xw.fillStyle='rgba('+Math.round(base[0]*f.k)+','+Math.round(base[1]*f.k)+','+Math.round(base[2]*f.k)+','+alpha+')';
+    xw.fill();
+  }
+}
+function drawW(){
+  if(WW===0){resizeW(); if(WW===0)return;}
+  xw.clearRect(0,0,WW,HW);
+  SW.t+=0.016;
+  /* ceiling/truss grid at cabinet-top level (hanging system) */
+  const CEIL=MH+5.4;
+  xw.strokeStyle='rgba(120,140,180,0.14)';xw.lineWidth=1;
+  xw.beginPath();
+  for(let i=0;i<=12;i++){
+    const x=(i-6)*PITCH;
+    let a=projW(x,CEIL,-6*PITCH), b=projW(x,CEIL,6*PITCH);
+    xw.moveTo(a[0],a[1]);xw.lineTo(b[0],b[1]);
+    a=projW(-6*PITCH,CEIL,x); b=projW(6*PITCH,CEIL,x);
+    xw.moveTo(a[0],a[1]);xw.lineTo(b[0],b[1]);
+  }
+  xw.stroke();
+  /* labels at ceiling plane */
+  for(let ci=0;ci<12;ci++){
+    const p=projW(wx(ci),CEIL+2.6,wz(1)+12);
+    if(p[2]>0){xw.fillStyle=COLS[ci].c;xw.font='700 '+Math.max(9,Math.min(17,p[2]*3))+'px Segoe UI';xw.textAlign='center';xw.fillText(COLS[ci].l,p[0],p[1]);}
+  }
+  for(let row=1;row<=12;row++){
+    const p=projW(-6.9*PITCH,CEIL+2.6,wz(row));
+    if(p[2]>0){xw.fillStyle='rgba(139,151,180,.75)';xw.font='600 '+Math.max(8,Math.min(13,p[2]*2.4))+'px Segoe UI';xw.textAlign='center';xw.fillText(row,p[0],p[1]);}
+  }
+  /* modules far->near */
+  const mods=[];
+  for(let ci=0;ci<12;ci++)for(let row=1;row<=12;row++){
+    const c=projW(wx(ci),26,wz(row));
+    mods.push({ci,row,zc:c[3]});
+  }
+  mods.sort((a,b)=>a.zc-b.zc);
+  pickMapW=[];
+  for(const md of mods){
+    const rgb=hex2rgb(COLS[md.ci].c);
+    const x0=wx(md.ci)-HALF,x1=wx(md.ci)+HALF,z0=wz(md.row)-HALF,z1=wz(md.row)+HALF;
+    const isSel=selCi===md.ci&&selRow===md.row;
+    if(SHOWW.led){
+      drawBoxW(boxCW(x0,x1,0,MH,z0,z1),rgb,0.16);
+    }
+    let pickC;
+    if(SHOWW.cab){
+      pickC=boxCW(x0+0.4,x1-0.4,MH,MH+5.4,z0+0.4,z1-0.4);
+      drawBoxW(pickC,[38,48,70],0.96,rgb);
+    }else{
+      pickC=boxCW(x0,x1,0,MH,z0,z1);
+    }
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+    for(const c of pickC){mnx=Math.min(mnx,c[0]);mxx=Math.max(mxx,c[0]);mny=Math.min(mny,c[1]);mxy=Math.max(mxy,c[1]);}
+    pickMapW.push({ci:md.ci,row:md.row,mnx,mny,mxx,mxy,zc:md.zc,corners:pickC});
+    if(isSel){
+      xw.strokeStyle='rgba(255,255,255,.95)';xw.lineWidth=1.6;
+      const E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+      xw.beginPath();
+      for(const[a,b]of E){xw.moveTo(pickC[a][0],pickC[a][1]);xw.lineTo(pickC[b][0],pickC[b][1]);}
+      xw.stroke();
+    }
+  }
+  /* source nodes + cables */
+  const zSrc=wz(1)+20, yCab=MH+6.2;
+  if(SHOWW.pow){
+    drawBoxW(boxCW(17,27,0,8,zSrc-4,zSrc+4),[90,40,40],0.95,[255,107,93]);
+    const p=projW(22,11,zSrc);
+    if(p[2]>0){xw.fillStyle='#ff6b5d';xw.font='700 12px Segoe UI';xw.textAlign='center';xw.fillText('Power',p[0],p[1]);}
+    xw.strokeStyle='rgba(255,107,93,.85)';xw.lineWidth=2;xw.setLineDash([]);
+    for(let ci=0;ci<12;ci++){
+      const ox=wx(ci)+1.6;
+      xw.beginPath();
+      let p2=projW(22,8,zSrc); xw.moveTo(p2[0],p2[1]);
+      p2=projW(ox,yCab,wz(1)+9); xw.lineTo(p2[0],p2[1]);
+      for(let row=1;row<=12;row++){p2=projW(ox,yCab,wz(row));xw.lineTo(p2[0],p2[1]);}
+      xw.stroke();
+    }
+  }
+  if(SHOWW.data){
+    drawBoxW(boxCW(-27,-17,0,8,zSrc-4,zSrc+4),[35,80,110],0.95,[50,207,162]);
+    const p=projW(-22,11,zSrc);
+    if(p[2]>0){xw.fillStyle='#37e6b4';xw.font='700 12px Segoe UI';xw.textAlign='center';xw.fillText('Management PC',p[0],p[1]);}
+    xw.strokeStyle='rgba(55,230,180,.95)';xw.lineWidth=2;
+    xw.setLineDash([7,6]);xw.lineDashOffset=-SW.t*30;
+    for(let ci=0;ci<12;ci++){
+      const ox=wx(ci)-1.6;
+      xw.beginPath();
+      let p2=projW(-22,8,zSrc); xw.moveTo(p2[0],p2[1]);
+      p2=projW(ox,yCab,wz(1)+9); xw.lineTo(p2[0],p2[1]);
+      for(let row=1;row<=12;row++){p2=projW(ox,yCab,wz(row));xw.lineTo(p2[0],p2[1]);}
+      xw.stroke();
+    }
+    xw.setLineDash([]);
+  }
+}
+/* wire tab interactions */
+cw.addEventListener('pointerdown',e=>{SW.drag=true;SW.moved=false;SW.lx=e.clientX;SW.ly=e.clientY;cw.setPointerCapture(e.pointerId);});
+cw.addEventListener('pointermove',e=>{
+  if(!SW.drag)return;
+  const dx=e.clientX-SW.lx, dy=e.clientY-SW.ly;
+  if(Math.abs(dx)+Math.abs(dy)>3)SW.moved=true;
+  SW.yaw+=dx*0.008; SW.pitch-=dy*0.009;
+  SW.pitch=Math.max(-1.55,Math.min(0.75,SW.pitch));   /* allow looking up (hanging display) */
+  SW.lx=e.clientX;SW.ly=e.clientY;
+});
+cw.addEventListener('pointerup',()=>{SW.drag=false;});
+cw.addEventListener('click',e=>{
+  if(SW.moved)return;
+  const r=cw.getBoundingClientRect();
+  const px=e.clientX-r.left, py=e.clientY-r.top;
+  let best=null;
+  for(const p of pickMapW){
+    if(px<p.mnx||px>p.mxx||py<p.mny||py>p.mxy)continue;
+    let hit=false;
+    for(const f of FACES){
+      const q=f.idx.map(i=>p.corners[i]);
+      if(pip(px,py,q)){hit=true;break;}
+    }
+    if(hit && (!best||p.zc>best.zc))best=p;
+  }
+  if(best)select(best.ci,best.row,true);
+});
+cw.addEventListener('wheel',e=>{
+  e.preventDefault();
+  SW.zoom*=(e.deltaY<0?1.1:0.9);
+  SW.zoom=Math.max(0.45,Math.min(2.6,SW.zoom));
+},{passive:false});
+const VIEWSW={
+  persp:{yaw:0.55,pitch:-0.62,zoom:0.95},
+  top:  {yaw:0.0, pitch:-1.52,zoom:0.8},
+  front:{yaw:0.0, pitch:-0.08,zoom:0.95},
+};
+document.getElementById('viewbtnsw').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  const v=VIEWSW[b.dataset.vw]; if(!v)return;
+  SW.yaw=v.yaw; SW.pitch=v.pitch; SW.zoom=v.zoom;
+  document.querySelectorAll('#viewbtnsw button').forEach(x=>x.classList.toggle('on',x===b));
+});
+document.getElementById('wCab').addEventListener('change',e=>SHOWW.cab=e.target.checked);
+document.getElementById('wData').addEventListener('change',e=>SHOWW.data=e.target.checked);
+document.getElementById('wPow').addEventListener('change',e=>SHOWW.pow=e.target.checked);
+document.getElementById('wLed').addEventListener('change',e=>SHOWW.led=e.target.checked);
+window.__drawW=drawW;
+window.__pickMapW=()=>pickMapW;
+
+/* debug/test hooks */
+window.__draw3d=draw3;
+window.__pickMap=()=>pickMap;
+
+/* ================= POWER TAB ================= */
+const PH=[{n:'L1',c:'#ff6b5d'},{n:'L2',c:'#ffd166'},{n:'L3',c:'#4aa8ff'}];
+const CKTC=['#37e6b4','#4aa8ff','#f65fc0','#ffd166','#7c4dff','#4dd7c9'];
+const PWR={wsqm:3040,load:100,volt:220,pf:0.95,brk:20,lay:'block',mode:'phase'};
+const MOD_AREA=0.25, DERATE=0.8;
+const WIRE=[[16,'2.5'],[20,'4'],[25,'4'],[32,'6'],[40,'10'],[63,'16'],[80,'25'],[100,'35'],[125,'50'],[160,'70'],[200,'95'],[250,'120'],[320,'185'],[400,'240']];
+const STDBRK=[16,20,25,32,40,50,63,80,100,125,160,200,250,320,400,500,630];
+function wireFor(a){for(const[r,mm]of WIRE)if(a<=r)return mm;return '300+';}
+function brkFor(a){for(const b of STDBRK)if(a<=b*DERATE)return b;return Math.ceil(a/DERATE);}
+function calcPwr(){
+  const wMod=PWR.wsqm*MOD_AREA*(PWR.load/100);
+  const iMod=wMod/(PWR.volt*PWR.pf);
+  const usable=PWR.brk*DERATE;
+  const modPerCkt=Math.max(1,Math.floor(usable/iMod));
+  const cktPerCol=Math.ceil(12/modPerCkt);
+  const totalCkt=cktPerCol*12;
+  const totalW=144*wMod;
+  const iPhase=totalW/(3*PWR.volt*PWR.pf);
+  const iSingle=totalW/(PWR.volt*PWR.pf);
+  return {wMod,iMod,usable,modPerCkt,cktPerCol,totalCkt,totalW,iPhase,iSingle,
+    maxW:PWR.wsqm*MOD_AREA*144, mainBrk:brkFor(iPhase), wire:wireFor(iPhase),
+    cktWire:wireFor(PWR.brk), iCkt:0};
+}
+function phaseOf(ci){return PWR.lay==='block'?Math.floor(ci/4):(ci%3);}
+function cktOf(ci,row,c){return {local:Math.floor((row-1)/c.modPerCkt), id:ci*c.cktPerCol+Math.floor((row-1)/c.modPerCkt)+1};}
+function fmt(n,d){return n.toLocaleString(undefined,{minimumFractionDigits:d||0,maximumFractionDigits:d||0});}
+function renderPwr(){
+  const t=T(), c=calcPwr();
+  /* stats */
+  document.getElementById('pwrstats').innerHTML=
+     st(t.ps_totmax,fmt(c.maxW/1000,1),'kW','')
+    +st(t.ps_totnow,fmt(c.totalW/1000,1),'kW',PWR.load<100?'cool':'')
+    +st(t.ps_mod,fmt(c.wMod,0)+' W',fmt(c.iMod,2)+' A','')
+    +st(t.ps_col,fmt(c.wMod*12/1000,1)+' kW',fmt(c.iMod*12,1)+' A','hot')
+    +st(t.ps_modckt,c.modPerCkt,t.u_modules,'')
+    +st(t.ps_ckt,c.totalCkt,t.u_circuits,'')
+    +st(t.ps_iphase,fmt(c.iPhase,0)+' A',t.ps_iphase_sub,'hot')
+    +st(t.ps_main,c.mainBrk+' A',t.ps_main_sub,'');
+  /* warnings */
+  const colA=c.iMod*12;
+  let w='';
+  w+='<div class="wrow bad">'+t.w_col(fmt(colA,1),c.cktPerCol,PWR.brk)+'</div>';
+  w+='<div class="wrow">'+t.w_phase(fmt(c.iPhase,0),c.mainBrk,c.wire)+'</div>';
+  w+='<div class="wrow">'+t.w_single(fmt(c.iSingle,0))+'</div>';
+  w+='<div class="wrow ok">'+t.w_inrush+'</div>';
+  document.getElementById('pwrwarn').innerHTML=w;
+  /* grid */
+  let g='<div class="mhead"></div>';
+  for(const col of COLS)g+='<div class="mhead">'+col.l+'</div>';
+  for(let row=12;row>=1;row--){
+    g+='<div class="rowlab">'+row+'</div>';
+    for(let ci=0;ci<12;ci++){
+      const ph=phaseOf(ci), ck=cktOf(ci,row,c);
+      const bg=PWR.mode==='phase'?PH[ph].c:CKTC[ck.local%CKTC.length];
+      const lbl=PWR.mode==='phase'?PH[ph].n:('C'+ck.id);
+      g+='<div class="module" data-ci="'+ci+'" data-row="'+row+'" style="background:'+bg+';color:#1a1208;font-size:10px" title="'+COLS[ci].l+row+' · '+PH[ph].n+' · C'+ck.id+'">'+lbl+'</div>';
+    }
+  }
+  document.getElementById('pmatrix').innerHTML=g;
+  /* legend */
+  document.getElementById('pLegend').innerHTML = PWR.mode==='phase'
+    ? PH.map((p,i)=>'<div class="chip"><span class="sw" style="background:'+p.c+'"></span>'+p.n+' · '+(PWR.lay==='block'?t.lg_block(i):t.lg_inter(i))+' · '+fmt(c.iPhase,0)+' A</div>').join('')
+    : t.lg_ckt(c.cktPerCol,c.modPerCkt,c.totalCkt);
+  /* circuit table */
+  let tb='';
+  for(let ci=0;ci<12;ci++){
+    for(let k=0;k<c.cktPerCol;k++){
+      const r0=k*c.modPerCkt+1, r1=Math.min(12,(k+1)*c.modPerCkt);
+      const n=r1-r0+1, ph=phaseOf(ci);
+      tb+='<tr><td><b>C'+(ci*c.cktPerCol+k+1)+'</b></td>'
+        +'<td><span class="msw" style="background:'+PH[ph].c+'"></span>'+PH[ph].n+'</td>'
+        +'<td><span class="msw" style="background:'+COLS[ci].c+'"></span>'+COLS[ci].l+'</td>'
+        +'<td class="mono">'+COLS[ci].l+r0+(n>1?(' – '+COLS[ci].l+r1):'')+' ('+n+')</td>'
+        +'<td class="mono">'+fmt(n*c.wMod,0)+' W</td>'
+        +'<td class="mono">'+fmt(n*c.iMod,1)+' A</td>'
+        +'<td class="mono">'+PWR.brk+' A / '+c.cktWire+' mm²</td></tr>';
+    }
+  }
+  document.getElementById('ckttbody').innerHTML=tb;
+  /* feed diagram (SVG) */
+  const bw=190, gap=26, x0=40, ytop=40;
+  const svgW=x0+3*bw+2*gap+40, svgH=ytop+250;
+  let s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="width:100%;min-width:640px;height:auto" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect x="'+(svgW/2-130)+'" y="6" width="260" height="40" rx="10" fill="#131a2b" stroke="#37e6b4"/>';
+  s+='<text x="'+svgW/2+'" y="24" fill="#37e6b4" font-size="13" font-weight="700" text-anchor="middle">'+t.fd_main+'</text>';
+  s+='<text x="'+svgW/2+'" y="39" fill="#8b97b4" font-size="11" text-anchor="middle">'+c.mainBrk+' A · 3-phase · '+c.wire+' mm²</text>';
+  for(let p=0;p<3;p++){
+    const bx=x0+p*(bw+gap), by=ytop+80;
+    s+='<path d="M '+svgW/2+' 46 L '+svgW/2+' '+(by-32)+' L '+(bx+bw/2)+' '+(by-32)+' L '+(bx+bw/2)+' '+by+'" fill="none" stroke="'+PH[p].c+'" stroke-width="2.5"/>';
+    s+='<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="46" rx="9" fill="#131a2b" stroke="'+PH[p].c+'"/>';
+    s+='<text x="'+(bx+bw/2)+'" y="'+(by+19)+'" fill="'+PH[p].c+'" font-size="12.5" font-weight="700" text-anchor="middle">'+PH[p].n+' · '+t.fd_box+' '+(p+1)+'</text>';
+    s+='<text x="'+(bx+bw/2)+'" y="'+(by+35)+'" fill="#8b97b4" font-size="10.5" text-anchor="middle">'+fmt(c.iPhase,0)+' A · '+(c.totalCkt/3)+' × '+PWR.brk+'A</text>';
+    const cols=[0,1,2,3,4,5,6,7,8,9,10,11].filter(ci=>phaseOf(ci)===p);
+    cols.forEach((ci,k)=>{
+      const cx=bx+((k+0.5)/cols.length)*bw, cy=by+46, ey=cy+52;
+      s+='<path d="M '+cx+' '+cy+' L '+cx+' '+ey+'" stroke="'+PH[p].c+'" stroke-width="1.6" opacity=".7"/>';
+      s+='<rect x="'+(cx-13)+'" y="'+ey+'" width="26" height="24" rx="6" fill="'+COLS[ci].c+'"/>';
+      s+='<text x="'+cx+'" y="'+(ey+16)+'" fill="#1a1208" font-size="12" font-weight="700" text-anchor="middle">'+COLS[ci].l+'</text>';
+      s+='<text x="'+cx+'" y="'+(ey+40)+'" fill="#8b97b4" font-size="9.5" text-anchor="middle">'+c.cktPerCol+'×'+PWR.brk+'A</text>';
+    });
+  }
+  s+='</svg>';
+  document.getElementById('feeddiag').innerHTML=s;
+  /* options */
+  document.getElementById('pwropts').innerHTML=t.opts(c);
+  renderDetailP(c);
+  function st(k,v,sub,cls){return '<div class="pstat '+(cls||'')+'"><div class="k">'+k+'</div><div class="v">'+v+' <small>'+sub+'</small></div></div>';}
+}
+function renderDetailP(c){
+  const t=T(), dp=document.getElementById('dcardp');
+  if(!dp)return;
+  if(selCi===null){dp.innerHTML='<div class="empty">'+t.empty_p+'</div>';return;}
+  c=c||calcPwr();
+  const ph=phaseOf(selCi), ck=cktOf(selCi,selRow,c);
+  const r0=ck.local*c.modPerCkt+1, r1=Math.min(12,(ck.local+1)*c.modPerCkt), n=r1-r0+1;
+  dp.innerHTML='<h3><span class="sw" style="background:'+COLS[selCi].c+'"></span>Module '+COLS[selCi].l+selRow+'</h3>'
+    +'<div class="kv">'
+    +'<div class="k">'+t.dp_pow+'</div><div class="v">'+fmt(c.wMod,0)+' W</div>'
+    +'<div class="k">'+t.dp_cur+'</div><div class="v">'+fmt(c.iMod,2)+' A</div>'
+    +'<div class="k">'+t.dp_ckt+'</div><div class="v mono">C'+ck.id+'</div>'
+    +'<div class="k">'+t.dp_share+'</div><div class="v mono">'+COLS[selCi].l+r0+(n>1?(' – '+COLS[selCi].l+r1):'')+'</div>'
+    +'<div class="k">'+t.dp_cktload+'</div><div class="v">'+fmt(n*c.iMod,1)+' A <span style="color:var(--muted);font-weight:400">/ '+PWR.brk+' A</span></div>'
+    +'<div class="k">'+t.dp_phase+'</div><div class="v" style="color:'+PH[ph].c+'">'+PH[ph].n+'</div>'
+    +'</div>';
+}
+function bindPwr(){
+  const rng=(id,vid,key,fn)=>{
+    const r=document.getElementById(id),v=document.getElementById(vid);
+    const u=()=>{PWR[key]=fn?fn(+r.value):+r.value; v.textContent=fn?fn(+r.value):r.value; renderPwr();};
+    r.addEventListener('input',u);
+  };
+  rng('r_wsqm','v_wsqm','wsqm');
+  rng('r_load','v_load','load');
+  rng('r_pf','v_pf','pf',x=>x/100);
+  const seg=(id,key,cast)=>document.getElementById(id).addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.toggle('on',x===b));
+    PWR[key]=cast?cast(b.dataset.v):b.dataset.v; renderPwr();
+  });
+  seg('s_volt','volt',Number); seg('s_brk','brk',Number); seg('s_lay','lay'); seg('s_mode','mode');
+  document.getElementById('pmatrix').addEventListener('click',e=>{
+    const el=e.target.closest('.module'); if(!el)return;
+    select(+el.dataset.ci,+el.dataset.row,true);
+  });
+}
+/* ===== data ↔ power resilience ===== */
+const FAIL={dtop:'chain12',ckt:'none'};
+const ST_OK=0, ST_DEAD=1, ST_DARK=2;   /* ok · no power · powered but no data */
+/* state of every module when branch circuit index `k` of each column is lost */
+function failState(c,k,dtop){
+  const g=[];
+  for(let ci=0;ci<12;ci++){
+    g[ci]=[];
+    /* first row that lost power in this column */
+    const r0=k*c.modPerCkt+1, r1=Math.min(12,(k+1)*c.modPerCkt);
+    for(let row=1;row<=12;row++){
+      let s=ST_OK;
+      if(k!==null && row>=r0 && row<=r1) s=ST_DEAD;
+      else if(k!==null && row>r1 && dtop==='chain12') s=ST_DARK;  /* data chain broken upstream */
+      g[ci][row]=s;
+    }
+  }
+  return g;
+}
+function failCount(g){
+  let dead=0,dark=0;
+  for(let ci=0;ci<12;ci++)for(let row=1;row<=12;row++){
+    if(g[ci][row]===ST_DEAD)dead++; else if(g[ci][row]===ST_DARK)dark++;
+  }
+  return {dead,dark,ok:144-dead-dark};
+}
+function worstCase(c,dtop){
+  let worst={dead:0,dark:0,ok:144,lost:0};
+  for(let k=0;k<c.cktPerCol;k++){
+    const n=failCount(failState(c,k,dtop));
+    const lost=n.dead+n.dark;
+    if(lost>worst.lost)worst={...n,lost};
+  }
+  return worst;
+}
+function renderFail(){
+  const t=T(), c=calcPwr();
+  const k=FAIL.ckt==='none'?null:+FAIL.ckt;
+  const g=failState(c,k,FAIL.dtop);
+  const n=failCount(g);
+  const COLOR={0:'#2a3550',1:'#ff4d4d',2:'#8a8f9c'};
+  const LBL={0:'',1:'✕',2:'○'};
+  /* stats */
+  document.getElementById('failstats').innerHTML=
+     '<div class="pstat"><div class="k">'+t.fs_ok+'</div><div class="v" style="color:#37e6b4">'+n.ok+'</div></div>'
+    +'<div class="pstat"><div class="k">'+t.fs_dead+'</div><div class="v" style="color:#ff4d4d">'+n.dead+'</div></div>'
+    +'<div class="pstat"><div class="k">'+t.fs_dark+'</div><div class="v" style="color:#c9ced8">'+n.dark+'</div></div>'
+    +'<div class="pstat"><div class="k">'+t.fs_lost+'</div><div class="v" style="color:#ffd166">'+Math.round((n.dead+n.dark)/144*100)+'%</div></div>';
+  /* grid */
+  let h='<div class="mhead"></div>';
+  for(const col of COLS)h+='<div class="mhead">'+col.l+'</div>';
+  for(let row=12;row>=1;row--){
+    h+='<div class="rowlab">'+row+'</div>';
+    for(let ci=0;ci<12;ci++){
+      const s=g[ci][row];
+      h+='<div class="module" style="background:'+COLOR[s]+';color:'+(s===0?'#7d8798':'#10131c')+';font-size:11px" title="'+COLS[ci].l+row+'">'+LBL[s]+'</div>';
+    }
+  }
+  document.getElementById('fmatrix').innerHTML=h;
+  document.getElementById('fLegend').innerHTML=
+     '<div class="chip"><span class="sw" style="background:#2a3550"></span>'+t.fs_ok+'</div>'
+    +'<div class="chip"><span class="sw" style="background:#ff4d4d"></span>'+t.fs_dead+'</div>'
+    +'<div class="chip"><span class="sw" style="background:#8a8f9c"></span>'+t.fs_dark+'</div>';
+  /* warning */
+  let w='';
+  if(k===null) w='<div class="wrow ok">'+t.fw_none+'</div>';
+  else if(n.dark>0) w='<div class="wrow bad">'+t.fw_dark(n.dark,n.dead)+'</div>';
+  else w='<div class="wrow ok">'+t.fw_clean(n.dead)+'</div>';
+  document.getElementById('failwarn').innerHTML=w;
+  /* topology comparison */
+  const rows=[['chain12',t.tc_chain,'—'],['match',t.tc_match,'3×'],['bypass',t.tc_bypass,'1×']];
+  let tb='';
+  for(const [key,name,port] of rows){
+    const wc=worstCase(c,key);
+    const cur=FAIL.dtop===key;
+    tb+='<tr'+(cur?' style="background:#173049"':'')+'>'
+      +'<td><b>'+name+'</b>'+(cur?' ◀':'')+'</td>'
+      +'<td class="mono" style="color:'+(wc.lost>12?'#ff6b5d':'#37e6b4')+'">'+wc.lost+' '+t.u_modules+'</td>'
+      +'<td class="mono" style="color:'+(wc.dark>0?'#ffd166':'#8b97b4')+'">'+wc.dark+'</td>'
+      +'<td class="mono">'+(key==='match'?(c.cktPerCol+'× / '+t.tc_percol):(key==='bypass'?'1× / '+t.tc_percol:'1× / '+t.tc_percol))+'</td>'
+      +'<td style="font-size:12px;color:var(--muted)">'+t.tc_note(key)+'</td></tr>';
+  }
+  document.getElementById('topocmpbody').innerHTML=tb;
+}
+function bindFail(){
+  const seg=(id,key)=>document.getElementById(id).addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.toggle('on',x===b));
+    FAIL[key]=b.dataset.v; renderFail();
+  });
+  seg('s_dtop','dtop'); seg('s_fail','ckt');
+}
+window.__renderFail=()=>renderFail();
+window.__failState=(k,d)=>failState(calcPwr(),k,d);
+
+window.__renderPwr=()=>renderPwr();
+window.__calcPwr=()=>calcPwr();
+
+/* ================= POWER 3D (cable routing) ================= */
+const cp=document.getElementById('c3p'), xp=cp.getContext('2d');
+let WP=0,HP=0,DPRP=1,pickMapP=[];
+const SP={yaw:0.5,pitch:-0.5,zoom:0.8,drag:false,moved:false,lx:0,ly:0,
+          phf:'all',lbl:true,brk:true,led:true};
+const CEIL=MH+5.4, SUBY=CEIL+13, SUBZ=wz(1)+15, MAINZ=wz(1)+34;
+function resizeP(){
+  DPRP=Math.min(window.devicePixelRatio||1,2);
+  WP=cp.clientWidth; HP=cp.clientHeight;
+  if(WP===0)return;
+  cp.width=WP*DPRP; cp.height=HP*DPRP;
+  xp.setTransform(DPRP,0,0,DPRP,0,0);
+}
+window.addEventListener('resize',resizeP);
+function projP(px,py,pz){
+  const cy=Math.cos(SP.yaw),sy=Math.sin(SP.yaw),cx=Math.cos(SP.pitch),sx=Math.sin(SP.pitch);
+  let x=px, y=py-32, z=pz+8;
+  let x1=x*cy - z*sy, z1=x*sy + z*cy;
+  let y1=y*cx - z1*sx, z2=y*sx + z1*cx;
+  const f=Math.min(WP,HP)*1.28*SP.zoom;
+  const s=f/(230 - z2);
+  return [WP/2 + x1*s, HP/2 - y1*s, s, z2];
+}
+function boxP(x0,x1,y0,y1,z0,z1){
+  return [[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],
+          [x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]].map(p=>projP(p[0],p[1],p[2]));
+}
+function fillBoxP(cn,rgb,alpha,topRgb){
+  const fl=FACES.map(f=>({f,z:(cn[f.idx[0]][3]+cn[f.idx[2]][3])/2})).sort((a,b)=>a.z-b.z);
+  for(const{f}of fl){
+    const q=f.idx.map(i=>cn[i]);
+    xp.beginPath();xp.moveTo(q[0][0],q[0][1]);
+    for(let i=1;i<4;i++)xp.lineTo(q[i][0],q[i][1]);
+    xp.closePath();
+    const b=(f===FACES[0]&&topRgb)?topRgb:rgb;
+    xp.fillStyle='rgba('+Math.round(b[0]*f.k)+','+Math.round(b[1]*f.k)+','+Math.round(b[2]*f.k)+','+alpha+')';
+    xp.fill();
+  }
+}
+function polyP(pts,color,w){
+  xp.strokeStyle=color;xp.lineWidth=w;xp.lineJoin='round';xp.lineCap='round';
+  xp.beginPath();
+  let started=false;
+  for(const p of pts){
+    const q=projP(p[0],p[1],p[2]);
+    if(q[2]<=0)continue;
+    if(!started){xp.moveTo(q[0],q[1]);started=true;}else xp.lineTo(q[0],q[1]);
+  }
+  xp.stroke();
+}
+/* label queue: collected during the pass, then depth/priority sorted,
+   collision-tested and drawn last so geometry never covers text */
+let labelQ=[];
+const LBLSTAT={drawn:0,skipped:0,forced:0,boxes:[]};
+function labelP(x,y,z,text,color,size,prio){
+  const q=projP(x,y,z);
+  if(q[2]<=0)return;
+  labelQ.push({sx:q[0],sy:q[1],depth:q[3],scale:q[2],text,color,size:size||12,prio:prio||1});
+}
+function flushLabels(){
+  labelQ.sort((a,b)=>(b.prio-a.prio)||(b.depth-a.depth));
+  const boxes=[];
+  LBLSTAT.drawn=0;LBLSTAT.skipped=0;LBLSTAT.forced=0;LBLSTAT.boxes=boxes;
+  for(const L of labelQ){
+    const fs=Math.max(8.5,Math.min(L.size,L.scale*2.5));
+    xp.font='700 '+fs+'px Consolas,monospace';
+    const tw=xp.measureText(L.text).width, w=tw+9, h=fs+6;
+    const cx=Math.max(w/2+3,Math.min(WP-w/2-3,L.sx));
+    const clash=b0=>{
+      for(const b of boxes)
+        if(b0.x<b.x+b.w&&b0.x+b0.w>b.x&&b0.y<b.y+b.h&&b0.y+b0.h>b.y)return true;
+      return false;
+    };
+    /* try the anchor first, then nudge up/down in steps until it fits */
+    const tries=L.prio>=3?9:4;
+    let box=null;
+    for(let i=0;i<tries;i++){
+      const step=Math.ceil(i/2)*(h+2)*(i%2?-1:1);
+      const cy=Math.max(h,Math.min(HP-5,L.sy+step));
+      const cand={x:cx-w/2,y:cy-fs+1,w,h,cy};
+      if(!clash(cand)){box=cand;break;}
+    }
+    if(!box){
+      if(L.prio<3){LBLSTAT.skipped++;continue;}   /* low priority yields its space */
+      const cy=Math.max(h,Math.min(HP-5,L.sy));
+      box={x:cx-w/2,y:cy-fs+1,w,h,cy};
+      LBLSTAT.forced++;
+    }
+    const cy=box.cy;
+    boxes.push(box);
+    LBLSTAT.drawn++;
+    xp.fillStyle='rgba(7,9,15,.88)';
+    xp.fillRect(box.x,box.y,w,h);
+    if(L.prio>=3){xp.strokeStyle=L.color;xp.lineWidth=1;xp.strokeRect(box.x+.5,box.y+.5,w-1,h-1);}
+    xp.fillStyle=L.color;
+    xp.textAlign='center';
+    xp.fillText(L.text,cx,cy);
+  }
+  labelQ=[];
+}
+function subX(p){return PWR.lay==='block' ? wx(p*4+1.5) : wx(p===0?1.5:(p===1?5.5:9.5));}
+function drawP(){
+  if(WP===0){resizeP(); if(WP===0)return;}
+  xp.clearRect(0,0,WP,HP);
+  labelQ=[];
+  const c=calcPwr(), t=T();
+  const show=p=>SP.phf==='all'||+SP.phf===p;
+
+  /* ceiling grid */
+  xp.strokeStyle='rgba(120,140,180,0.10)';xp.lineWidth=1;
+  xp.beginPath();
+  for(let i=0;i<=12;i++){
+    const x=(i-6)*PITCH;
+    let a=projP(x,CEIL,-6*PITCH),b=projP(x,CEIL,6*PITCH);
+    xp.moveTo(a[0],a[1]);xp.lineTo(b[0],b[1]);
+    a=projP(-6*PITCH,CEIL,x);b=projP(6*PITCH,CEIL,x);
+    xp.moveTo(a[0],a[1]);xp.lineTo(b[0],b[1]);
+  }
+  xp.stroke();
+  for(let ci=0;ci<12;ci++){
+    const q=projP(wx(ci),CEIL+3,wz(1)+11);
+    if(q[2]>0){xp.fillStyle=COLS[ci].c;xp.font='700 '+Math.max(8,Math.min(15,q[2]*2.7))+'px Segoe UI';xp.textAlign='center';xp.fillText(COLS[ci].l,q[0],q[1]);}
+  }
+
+  /* LED volume + cabinets, far->near */
+  const mods=[];
+  for(let ci=0;ci<12;ci++)for(let row=1;row<=12;row++)
+    mods.push({ci,row,zc:projP(wx(ci),MH/2,wz(row))[3]});
+  mods.sort((a,b)=>a.zc-b.zc);
+  pickMapP=[];
+  const fk=FAIL.ckt==='none'?null:+FAIL.ckt;
+  const fg=fk===null?null:failState(c,fk,FAIL.dtop);
+  for(const md of mods){
+    const ph=phaseOf(md.ci), ck=cktOf(md.ci,md.row,c);
+    const on=show(ph);
+    let rgb=hex2rgb(PH[ph].c);
+    if(fg){
+      const s=fg[md.ci][md.row];
+      if(s===ST_DEAD)rgb=[255,77,77];
+      else if(s===ST_DARK)rgb=[138,143,156];
+    }
+    const x0=wx(md.ci)-HALF,x1=wx(md.ci)+HALF,z0=wz(md.row)-HALF,z1=wz(md.row)+HALF;
+    if(SP.led)fillBoxP(boxP(x0,x1,0,MH,z0,z1),rgb,on?0.14:0.04);
+    const cab=boxP(x0+0.4,x1-0.4,MH,CEIL,z0+0.4,z1-0.4);
+    fillBoxP(cab,[38,48,70],on?0.95:0.25,on?rgb:[45,55,75]);
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+    for(const q of cab){mnx=Math.min(mnx,q[0]);mxx=Math.max(mxx,q[0]);mny=Math.min(mny,q[1]);mxy=Math.max(mxy,q[1]);}
+    pickMapP.push({ci:md.ci,row:md.row,ck:ck.id,mnx,mny,mxx,mxy,zc:md.zc,corners:cab});
+    if(selCi===md.ci&&selRow===md.row){
+      xp.strokeStyle='#fff';xp.lineWidth=1.6;
+      const E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+      xp.beginPath();
+      for(const[a,b]of E){xp.moveTo(cab[a][0],cab[a][1]);xp.lineTo(cab[b][0],cab[b][1]);}
+      xp.stroke();
+    }
+  }
+
+  /* MAIN PANEL on the floor */
+  const mrgb=[55,230,180];
+  fillBoxP(boxP(-9,9,0,13,MAINZ-3,MAINZ+3),[26,34,52],0.97,mrgb);
+  labelP(0,20,MAINZ,t.p3_main+' '+c.mainBrk+'A×3','#37e6b4',13,3);
+  labelP(0,15.5,MAINZ,fmt(c.totalW/1000,1)+' kW · '+c.wire+'mm²','#8b97b4',11,2);
+
+  /* riser + sub panels + branch circuits */
+  for(let p=0;p<3;p++){
+    if(!show(p))continue;
+    const col=PH[p].c, sx=subX(p), rgb=hex2rgb(col);
+    const riserW=Math.max(2,Math.min(6,c.iPhase/45));
+    /* feeder: main -> up -> across -> sub panel */
+    polyP([[0,13,MAINZ],[0,SUBY+9,MAINZ],[sx,SUBY+9,MAINZ],[sx,SUBY+9,SUBZ],[sx,SUBY+6,SUBZ]],col,riserW);
+    if(SP.lbl)labelP(sx,SUBY+12.5,(MAINZ+SUBZ)/2,PH[p].n+' · '+fmt(c.iPhase,0)+'A · '+c.wire+'mm²',col,12,3);
+    /* sub panel box */
+    fillBoxP(boxP(sx-10,sx+10,SUBY-4,SUBY+6,SUBZ-2.6,SUBZ+2.6),[26,34,52],0.97,rgb);
+    if(SP.lbl){
+      labelP(sx,SUBY+8.5,SUBZ,t.p3_sub+' '+PH[p].n+' · '+(c.totalCkt/3)+'×'+PWR.brk+'A',col,12,3);
+    }
+    /* branch circuits */
+    const cols=[0,1,2,3,4,5,6,7,8,9,10,11].filter(ci=>phaseOf(ci)===p);
+    for(const ci of cols){
+      const cx=wx(ci);
+      for(let k=0;k<c.cktPerCol;k++){
+        const r0=k*c.modPerCkt+1, r1=Math.min(12,(k+1)*c.modPerCkt);
+        if(r0>12)continue;
+        const n=r1-r0+1, amp=n*c.iMod;
+        const gz=(wz(r0)+wz(r1))/2;
+        const bw=Math.max(1.2,Math.min(4,amp/6));
+        const isSel=selCi===ci && selRow>=r0 && selRow<=r1;
+        const isDead=fk===k;
+        const lane=SUBY-4-k*2.4;
+        polyP([[sx,SUBY-4,SUBZ],[cx,lane,SUBZ],[cx,lane,gz],[cx,CEIL+1,gz]],
+              isDead?'rgba(255,77,77,.35)':(isSel?'#ffffff':col), isSel?bw+1.4:bw);
+        /* breaker at the sub panel tap */
+        if(SP.brk){
+          const bq=projP(sx+(cx>sx?9.5:-9.5),SUBY-4+k*0.5,SUBZ);
+          if(bq[2]>0){
+            const s=Math.max(3,bq[2]*0.9);
+            xp.fillStyle=isSel?'#fff':col;
+            xp.fillRect(bq[0]-s/2,bq[1]-s/2,s,s*1.5);
+          }
+        }
+        /* current label at the drop — selected one always wins its space,
+           the rest are dropped by the collision pass when they would overlap */
+        if(SP.lbl){
+          labelP(cx,CEIL+4,gz,'C'+(ci*c.cktPerCol+k+1)+' · '+fmt(amp,1)+'A',
+                 isSel?'#fff':col, isSel?12:10.5, isSel?3:1);
+        }
+      }
+    }
+  }
+  flushLabels();   /* all text drawn last, sorted + de-overlapped */
+  /* selected circuit summary chip on canvas */
+  if(selCi!==null){
+    const ck=cktOf(selCi,selRow,c), ph=phaseOf(selCi);
+    const r0=ck.local*c.modPerCkt+1, r1=Math.min(12,(ck.local+1)*c.modPerCkt), n=r1-r0+1;
+    xp.font='700 13px Segoe UI';xp.textAlign='left';
+    xp.fillStyle='rgba(7,9,15,.86)';xp.fillRect(12,12,268,54);
+    xp.fillStyle=PH[ph].c;xp.fillText('C'+ck.id+' · '+PH[ph].n+' · '+COLS[selCi].l+r0+'–'+COLS[selCi].l+r1,22,32);
+    xp.fillStyle='#dfe7f5';xp.font='600 12px Consolas,monospace';
+    xp.fillText(fmt(n*c.wMod,0)+' W · '+fmt(n*c.iMod,1)+' A / '+PWR.brk+' A · '+c.cktWire+' mm²',22,52);
+  }
+}
+function loopP(){
+  if(document.getElementById('tabpower').style.display!=='none')drawP();
+  requestAnimationFrame(loopP);
+}
+cp.addEventListener('pointerdown',e=>{SP.drag=true;SP.moved=false;SP.lx=e.clientX;SP.ly=e.clientY;cp.setPointerCapture(e.pointerId);});
+cp.addEventListener('pointermove',e=>{
+  if(!SP.drag)return;
+  const dx=e.clientX-SP.lx,dy=e.clientY-SP.ly;
+  if(Math.abs(dx)+Math.abs(dy)>3)SP.moved=true;
+  SP.yaw+=dx*0.008; SP.pitch-=dy*0.009;
+  SP.pitch=Math.max(-1.55,Math.min(0.75,SP.pitch));
+  SP.lx=e.clientX;SP.ly=e.clientY;
+});
+cp.addEventListener('pointerup',()=>{SP.drag=false;});
+cp.addEventListener('click',e=>{
+  if(SP.moved)return;
+  const r=cp.getBoundingClientRect();
+  const px=e.clientX-r.left,py=e.clientY-r.top;
+  let best=null;
+  for(const p of pickMapP){
+    if(px<p.mnx||px>p.mxx||py<p.mny||py>p.mxy)continue;
+    let hit=false;
+    for(const f of FACES){if(pip(px,py,f.idx.map(i=>p.corners[i]))){hit=true;break;}}
+    if(hit&&(!best||p.zc>best.zc))best=p;
+  }
+  if(best)select(best.ci,best.row,true);
+});
+cp.addEventListener('wheel',e=>{
+  e.preventDefault();
+  SP.zoom*=(e.deltaY<0?1.1:0.9);
+  SP.zoom=Math.max(0.4,Math.min(2.6,SP.zoom));
+},{passive:false});
+const VIEWSP={persp:{yaw:0.5,pitch:-0.5,zoom:0.8},top:{yaw:0,pitch:-1.5,zoom:0.72},front:{yaw:0,pitch:-0.1,zoom:0.8}};
+document.getElementById('viewbtnsp').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  const v=VIEWSP[b.dataset.vw]; if(!v)return;
+  SP.yaw=v.yaw;SP.pitch=v.pitch;SP.zoom=v.zoom;
+  document.querySelectorAll('#viewbtnsp button').forEach(x=>x.classList.toggle('on',x===b));
+});
+document.getElementById('s_phf').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('#s_phf button').forEach(x=>x.classList.toggle('on',x===b));
+  SP.phf=b.dataset.v;
+});
+document.getElementById('pLbl').addEventListener('change',e=>SP.lbl=e.target.checked);
+document.getElementById('pBrk').addEventListener('change',e=>SP.brk=e.target.checked);
+document.getElementById('pLed').addEventListener('change',e=>SP.led=e.target.checked);
+window.__drawP=drawP;
+window.__pickMapP=()=>pickMapP;
+window.__lblStat=()=>LBLSTAT;
+
+/* ===== tabs ===== */
+function setTab(t){
+  document.getElementById('tab2d').style.display=(t==='2d')?'':'none';
+  document.getElementById('tab3d').style.display=(t==='3d')?'':'none';
+  document.getElementById('tabwire').style.display=(t==='wire')?'':'none';
+  document.getElementById('tabpower').style.display=(t==='power')?'':'none';
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  if(t==='3d'){resize3();draw3();}
+  if(t==='wire'){resizeW();drawW();}
+  if(t==='power'){renderPwr();renderFail();resizeP();drawP();}
+}
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(b)setTab(b.dataset.tab);
+});
+
+/* ===== apply language ===== */
+function applyLang(lang){
+  LANG=lang;
+  try{localStorage.setItem('ledmap_lang',lang);}catch(e){}
+  document.documentElement.lang = lang==='zh'?'zh-CN':lang;
+  document.querySelectorAll('#langbar button').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
+  const t=T();
+  const setT=(id,v)=>{const el=document.getElementById(id); if(el)el.innerHTML=v;};
+  setT('i_sub',t.sub); setT('i_tab2d',t.tab2d); setT('i_tab3d',t.tab3d);
+  setT('i_sec1',t.sec1); setT('i_sec2',t.sec2); setT('i_sec3',t.sec3);
+  setT('i_sec3d',t.sec3d); setT('i_hint3d',t.hint3d); setT('i_rot',t.rot); setT('i_pix',t.pix);
+  setT('i_vwlabel',t.vwlabel); setT('i_vwpersp',t.vwpersp); setT('i_vwtop',t.vwtop); setT('i_vwfront',t.vwfront);
+  setT('i_tabwire',t.tabwire); setT('i_secwire',t.secwire); setT('i_hintwire',t.hintwire);
+  setT('i_wcab',t.wcab); setT('i_wdata',t.wdata); setT('i_wpow',t.wpow); setT('i_wled',t.wled);
+  setT('i_legendwire',t.legendwire);
+  setT('i_vwlabelw',t.vwlabel); setT('i_vwperspw',t.vwpersp); setT('i_vwtopw',t.vwtop); setT('i_vwfrontw',t.vwfront);
+  /* power tab */
+  setT('i_tabpower',t.tabpower);
+  setT('i_secpwr1',t.secpwr1); setT('i_secpwr2',t.secpwr2); setT('i_secpwr3',t.secpwr3); setT('i_secpwr4',t.secpwr4);
+  setT('i_p_wsqm',t.p_wsqm); setT('i_p_load',t.p_load); setT('i_p_pf',t.p_pf);
+  setT('i_p_volt',t.p_volt); setT('i_p_brk',t.p_brk); setT('i_p_lay',t.p_lay);
+  setT('i_lay_block',t.lay_block); setT('i_lay_inter',t.lay_inter);
+  setT('i_m_phase',t.m_phase); setT('i_m_circuit',t.m_circuit);
+  setT('i_ct_id',t.ct_id); setT('i_ct_ph',t.ct_ph); setT('i_ct_col',t.ct_col);
+  setT('i_ct_mod',t.ct_mod); setT('i_ct_w',t.ct_w); setT('i_ct_a',t.ct_a); setT('i_ct_brk',t.ct_brk);
+  setT('i_legendpwr',t.legendpwr);
+  setT('i_secpwr5',t.secpwr5); setT('i_hintpwr3d',t.hintpwr3d);
+  setT('i_p_phfilter',t.p_phfilter); setT('i_phf_all',t.phf_all);
+  setT('i_p_lbl',t.p_lbl); setT('i_p_brkshow',t.p_brkshow); setT('i_p_ledshow',t.p_ledshow);
+  setT('i_legendpwr3d',t.legendpwr3d);
+  setT('i_vwlabelp',t.vwlabel); setT('i_vwperspp',t.vwpersp); setT('i_vwtopp',t.vwtop); setT('i_vwfrontp',t.vwfront);
+  /* resilience section */
+  setT('i_secpwr6',t.secpwr6); setT('i_p_dtop',t.p_dtop); setT('i_p_fail',t.p_fail);
+  setT('i_dt_chain',t.dt_chain); setT('i_dt_match',t.dt_match); setT('i_dt_bypass',t.dt_bypass);
+  setT('i_fail_none',t.fail_none); setT('i_faillegend',t.faillegend);
+  setT('i_tc_opt',t.tc_opt); setT('i_tc_worst',t.tc_worst); setT('i_tc_dark',t.tc_dark);
+  setT('i_tc_port',t.tc_port); setT('i_tc_note',t.tc_notehdr);
+  if(typeof renderPwr==='function')renderPwr();
+  if(typeof renderFail==='function')renderFail();
+  setT('i_legend3d',t.legend3d);
+  setT('i_findlabel',t.findlabel); setT('uBtn',t.findbtn);
+  setT('i_in_t',t.in_t); setT('i_in_d',t.in_d); setT('i_main_d',t.main_d); setT('i_mgmt_d',t.mgmt_d);
+  setT('i_artnet_lb',t.artnet_lb); setT('i_note',t.note);
+  setT('i_th_mod',t.th_mod); setT('i_th_ip',t.th_ip); setT('i_th_uni',t.th_uni);
+  setT('i_th_px',t.th_px); setT('i_th_ch',t.th_ch); setT('i_th_pos',t.th_pos);
+  setT('i_allbtn',t.allbtn); setT('i_footer1',t.footer1);
+  document.getElementById('tSearch').placeholder=t.searchph;
+  document.getElementById('uMsg').textContent='';
+  renderDetail();
+}
+document.getElementById('langbar').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(b)applyLang(b.dataset.lang);
+});
+
+/* ===== start ===== */
+let saved='th';
+try{saved=localStorage.getItem('ledmap_lang')||'th';}catch(e){}
+bindPwr();
+bindFail();
+applyLang(saved);
+select(0,1,false);
+resize3();
+resizeP();
+loop3();
+loopP();
+</script>
+</body>
+</html>

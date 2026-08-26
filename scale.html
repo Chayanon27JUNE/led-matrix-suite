@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEDMatrixSystem — ขยายสเกล & คุมกล้องสไลซ์</title>
+<style>
+  :root{
+    --bg:#070a12; --panel:#0e1420; --panel2:#141c2e; --line:#22304c;
+    --txt:#e4ebf7; --muted:#8e9bb8; --accent:#4aa8ff; --accent2:#37e6b4; --hot:#ff5d8f;
+    --warn:#ffd166;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:radial-gradient(1100px 640px at 74% -12%,#101c30 0%,var(--bg) 58%);
+    color:var(--txt);font-family:"Segoe UI",Tahoma,system-ui,sans-serif;line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 90px}
+  header.hero{text-align:center;padding:18px 10px 6px}
+  .kicker{letter-spacing:.26em;font-size:11.5px;color:var(--accent);text-transform:uppercase;font-weight:700}
+  h1{font-size:clamp(25px,3.8vw,42px);margin:.22em 0 .1em;
+     background:linear-gradient(90deg,#fff,var(--accent) 50%,var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:var(--muted);max-width:760px;margin:.4em auto 0;font-size:14.5px}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0 4px}
+  .badge{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--muted)}
+  .badge b{color:var(--accent2)}
+  section{margin-top:34px}
+  .h2{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;margin:0 0 13px}
+  .h2 .n{min-width:27px;height:27px;padding:0 7px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#04121a;display:grid;place-items:center;font-size:13px;font-weight:800}
+  .card{background:linear-gradient(180deg,var(--panel),#0a0f19);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .lead{color:var(--muted);font-size:14px;margin:0 0 14px}
+  .lead b{color:var(--txt)}
+  .g2{display:grid;grid-template-columns:1.2fr .95fr;gap:18px}
+  .g2e{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.g2,.g2e{grid-template-columns:1fr}}
+  canvas{width:100%;display:block;border-radius:12px;border:1px solid var(--line);
+    background:radial-gradient(600px 380px at 50% 45%,#0c1526,#05070e)}
+  #rig{height:400px}#capture,#captured{height:300px}#aspect{height:330px}#center{height:330px}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+  .ctl{margin-bottom:13px}
+  .ctl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+  .ctl label b{color:var(--accent2);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;user-select:none;margin-bottom:8px}
+  .toggle input{accent-color:var(--accent);width:16px;height:16px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .seg button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:8px;
+    padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:.12s}
+  .seg button:hover{color:var(--txt);border-color:var(--accent2)}
+  .seg button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a;border-color:transparent}
+  .note{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent2);
+    border-radius:0 11px 11px 0;padding:11px 14px;font-size:13px;color:var(--muted);margin-top:12px}
+  .note b{color:var(--txt)}
+  .note.bad{border-left-color:var(--hot)}
+  .note.warn{border-left-color:var(--warn)}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:9px 12px}
+  .stat .k{font-size:11px;color:var(--muted)}
+  .stat .v{font-size:19px;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:9px;margin-top:10px}
+  pre{background:#05080f;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;
+    font-size:12.5px;color:#c9e6df;margin:10px 0 0;line-height:1.6}
+  code{background:#05080f;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--warn);font-size:12.5px}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{background:var(--panel2);color:var(--accent2)}
+  .mono{font-family:Consolas,monospace}
+  .bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+  .bar .nm{width:190px;color:var(--muted);flex:none}
+  .bar .tr{flex:1;background:#0a1120;border:1px solid var(--line);border-radius:7px;height:22px;overflow:hidden}
+  .bar .fl{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .bar .fl.hot{background:linear-gradient(90deg,#ff8a5d,var(--hot))}
+  .bar .vv{width:96px;text-align:right;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;flex:none}
+  .grow{display:flex;gap:12px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--warn);
+    border-radius:0 11px 11px 0;padding:11px 14px;font-size:13px;margin-bottom:9px}
+  .grow .gi{font-size:19px}.grow b{color:var(--warn)}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  @media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+  .step{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .step .ic{font-size:20px}.step .nm{font-weight:700;font-size:13.5px;margin-top:5px}
+  .step .ct{font-size:11.5px;color:var(--muted);margin-top:3px}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px}
+</style>
+<link rel="stylesheet" href="assets/lmx.css">
+<script src="assets/i18n.js"></script>
+<script src="assets/lmx.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">TouchDesigner 2025 · LEDMatrixSystem.toe · 2026-08-26</div>
+    <h1>ขยายสเกล &amp; คุมกล้องสไลซ์</h1>
+    <p class="sub">จาก LED 6,912 ดวงที่ผูกกล้องไว้ตายตัว 12 ตัว → เป็น <b>248,832 ดวง</b> ที่สร้างชั้นเองอัตโนมัติ
+      หมุน/ซูม/เลื่อนมุมที่ content เข้าไปในก้อน LED ได้ และวางก้อนไว้กลาง origin</p>
+    <div class="badges">
+      <span class="badge">grid <b>72×72×48</b></span>
+      <span class="badge"><b>248,832</b> LED</span>
+      <span class="badge">texture <b>5,184×48</b></span>
+      <span class="badge">render <b>0.09 ms</b></span>
+      <span class="badge">ชั้น <b>72</b></span>
+    </div>
+  </header>
+
+  <!-- ============ 1 ============ -->
+  <section>
+    <div class="h2"><span class="n">1</span> ปัญหาเดิม — rig ที่ผูกไว้ตายตัว</div>
+    <div class="card">
+      <p class="lead">ระบบสไลซ์ต้องมีของ <b>3 อย่างต่อ 1 ชั้น</b>: กล้อง ortho 1 ตัว (ตั้ง near/far ให้เห็นเฉพาะแผ่นบางของตัวเอง),
+        renderpass 1 ตัว, และ out 1 ตัว &nbsp;→ เดิมวางมือไว้ <b>12 ชุด</b> แปลว่าสเกลได้แค่ 12 ชั้นเท่านั้น
+        ลากสไลเดอร์ดูว่าถ้าจะไป 144 โมดูลจริงต้องมีของกี่ชิ้น</p>
+      <div class="g2">
+        <div>
+          <canvas id="rig"></canvas>
+          <div class="hint">🖱️ ลากเพื่อหมุนดู · แต่ละแผ่น = 1 ชั้นที่กล้อง 1 ตัวถ่ายได้</div>
+        </div>
+        <div>
+          <div class="ctl"><label>โมดูล (Modx × Modz) <b id="vMod">2 × 2</b></label>
+            <input type="range" id="rMod" min="1" max="12" value="2"></div>
+          <div class="stats">
+            <div class="stat"><div class="k">ชั้น (Layers)</div><div class="v" id="sLayers">12</div></div>
+            <div class="stat"><div class="k">กว้าง/ชั้น (Slicew)</div><div class="v" id="sSlicew">12</div></div>
+            <div class="stat"><div class="k">LED ทั้งหมด</div><div class="v" id="sLed">6,912</div></div>
+            <div class="stat"><div class="k">texture</div><div class="v" id="sTex" style="font-size:15px">144×48</div></div>
+            <div class="stat"><div class="k">node ที่ต้องมี</div><div class="v" id="sNodes">36</div></div>
+            <div class="stat"><div class="k">ถ้าวางมือ (2 นาที/ชิ้น)</div><div class="v" id="sTime">1.2 ชม.</div></div>
+          </div>
+          <div class="note"><b>ทางออก:</b> ใส่ตรรกะสร้าง rig ไว้ในไฟล์ <code>.toe</code> เอง —
+            <code>slices_build</code> (textDAT) + <code>slices_exec</code> (parameterexecuteDAT)
+            → เปลี่ยน <code>Modz</code> แล้วกด <code>Rebuildslices</code> ระบบสร้าง/ลบ/ต่อสายให้ครบเอง
+            ทั้งตอนขยายและตอนย่อ</div>
+        </div>
+      </div>
+
+      <div class="steps" style="margin-top:16px">
+        <div class="step"><div class="ic">🎥</div><div class="nm">1. กล้อง</div>
+          <div class="ct">copy จาก item1 เข้า <span class="mono">camRig</span><br>near/far ผูกกับ Layers</div></div>
+        <div class="step"><div class="ic">🔗</div><div class="nm">2. renderpass</div>
+          <div class="ct">ต่อ chain จาก render2U<br>camera = <span class="mono">../camRig/itemK</span></div></div>
+        <div class="step"><div class="ic">📤</div><div class="nm">3. out</div>
+          <div class="ct">outK ← renderpass(N+1−K)<br>ล็อก nodeY = ลำดับ connector</div></div>
+        <div class="step"><div class="ic">🧩</div><div class="nm">4. layout</div>
+          <div class="ct">รื้อสายเก่าทั้งหมด<br>ต่อ input i ← out(N−i)</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section>
+    <div class="h2"><span class="n">2</span> คุมมุมกล้องสไลซ์ด้วย <span class="mono">camRig</span></div>
+    <div class="card">
+      <p class="lead">กล้องทั้ง N ตัวถูกทำให้เป็น<b>ลูกของ null ตัวเดียว</b> (<span class="mono">camRig</span>) →
+        ขยับ/หมุน rig ตัวเดียว กล้องตามทั้งชุดโดยที่ระยะ slab ยังเรียงถูก
+        <b>ซ้าย</b> = มองจากด้านบน เห็น scene กับ "กล่องที่กล้องจับ" · <b>ขวา</b> = สิ่งที่ไปโผล่ในก้อน LED</p>
+      <div class="g2e">
+        <div>
+          <canvas id="capture"></canvas>
+          <div class="hint">มุมบน (แกน X-Z) · กรอบฟ้า = พื้นที่ที่กล้องสไลซ์จับได้</div>
+        </div>
+        <div>
+          <canvas id="captured"></canvas>
+          <div class="hint">ก้อน LED มองจากด้านบน · เม็ดที่ติด = จุดที่ตกอยู่ในกรอบ</div>
+        </div>
+      </div>
+      <div class="g2e" style="margin-top:14px">
+        <div>
+          <div class="ctl"><label>Zoom (ขนาดพื้นที่ที่จับ) <b id="vZoom">1.00</b></label>
+            <input type="range" id="rZoom" min="30" max="200" value="100"></div>
+          <div class="ctl"><label>Roty (หมุนรอบแกน Y) <b id="vRot">0°</b></label>
+            <input type="range" id="rRot" min="-180" max="180" value="0"></div>
+        </div>
+        <div>
+          <div class="ctl"><label>Panx (เลื่อนซ้าย-ขวา) <b id="vPan">0.00</b></label>
+            <input type="range" id="rPan" min="-100" max="100" value="0"></div>
+          <div class="ctl"><label>Depth (เลื่อนแนวลึก) <b id="vDep">0.00</b></label>
+            <input type="range" id="rDep" min="-100" max="100" value="0"></div>
+        </div>
+      </div>
+      <div class="note warn"><b>ortho ไม่มี "ถอยกล้อง"</b> — กล้อง ortho ระยะห่างไม่มีผลกับขนาดภาพเลย
+        สิ่งที่ทำหน้าที่ถอย/เข้าใกล้คือ <code>Zoom</code> ซึ่งคุม <code>orthowidth</code> + <code>near/far</code> + <code>tz</code> พร้อมกัน
+        (ถ้าคุมแค่ orthowidth แกนลึกจะไม่ย่อตาม → สัดส่วนเพี้ยน)</div>
+      <pre>near = (me.digits-1) * (Zoom / Layers)      far = (me.digits) * (Zoom / Layers)
+tz   = Zoom * 0.5                          orthowidth = Zoom
+camRig:  tx = Panx   ty = Pany   tz = Depth   rx/ry/rz = Rotx/Roty/Rotz</pre>
+    </div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section>
+    <div class="h2"><span class="n">3</span> กับดักสัดส่วน — จอดำสนิทโดยไม่มี error</div>
+    <div class="card">
+      <p class="lead">กล้อง ortho <b>กว้าง 1 หน่วยเสมอ</b> แต่ความสูงที่เห็น = <span class="mono">resh / resw</span>
+        พอสไลซ์กว้างขึ้น (โมดูลเยอะขึ้น) กรอบแนวตั้ง<b>แคบลง</b> → scene ที่วางไว้กับ volume ทรงหอสูงจะหลุดกรอบทั้งหมด
+        ผลคือ renderpass ดำหมดทุกชั้น และ TouchDesigner <b>ไม่ฟ้อง error เลย</b></p>
+      <div class="g2">
+        <div>
+          <canvas id="aspect"></canvas>
+          <div class="hint">มุมด้านหน้า (แกน X-Y) · กรอบฟ้า = สิ่งที่กล้องเห็น · รูปเขียว = scene</div>
+        </div>
+        <div>
+          <div class="ctl"><label>โมดูล (Modx) <b id="vAMod">2</b></label>
+            <input type="range" id="rAMod" min="1" max="12" value="2"></div>
+          <label class="toggle"><input type="checkbox" id="cFit"> เปิด fit &nbsp;<span class="mono">sy = 12 / Slicew</span></label>
+          <div class="stats">
+            <div class="stat"><div class="k">1 สไลซ์ (px)</div><div class="v" id="sSlice" style="font-size:15px">12 × 48</div></div>
+            <div class="stat"><div class="k">กรอบที่เห็น</div><div class="v" id="sFrame" style="font-size:15px">1 × 4.00</div></div>
+            <div class="stat"><div class="k">scene สูง</div><div class="v" id="sScene" style="font-size:15px">4.00</div></div>
+            <div class="stat"><div class="k">ผล</div><div class="v" id="sVerdict" style="font-size:15px">พอดี</div></div>
+          </div>
+          <div class="note bad" id="aspectNote"><b>ตอนนี้พอดี</b> — scene สูง 4 หน่วย กรอบสูง 4 หน่วย</div>
+        </div>
+      </div>
+      <div class="note"><b>วิธีไล่จับ:</b> ไม่มี error ให้ดู → ต้อง <b>sample ค่า max ของ TOP ทีละสเตปในสาย</b>
+        (<code>op.numpyArray(delayed=False).max()</code>) แล้วเทียบกับ container ที่ทำงานได้
+        วันนี้จับได้ว่า renderpass = 0 ทุกตัวทั้งที่ POP มีจุด 800 จุด → ปัญหาอยู่ที่กรอบกล้อง ไม่ใช่ที่ content</div>
+    </div>
+  </section>
+
+  <!-- ============ 4 ============ -->
+  <section>
+    <div class="h2"><span class="n">4</span> จัดก้อน LED ให้อยู่กลาง origin</div>
+    <div class="card">
+      <div class="g2">
+        <div>
+          <canvas id="center"></canvas>
+          <div class="hint">🖱️ ลากเพื่อหมุน · เส้นไขว้ = origin (จุดที่กล้อง preview หมุนรอบ)</div>
+        </div>
+        <div>
+          <div class="seg">
+            <button id="bOff" class="on">ก่อนแก้ (มุมกล่องอยู่ที่ 0)</button>
+            <button id="bOn">หลังแก้ (กลาง origin)</button>
+          </div>
+          <p class="lead">posTOP เขียนตำแหน่งเริ่มที่ <span class="mono">(ix+0.5)·pitch</span> → ก้อน LED กิน 0 → 4.5
+            ทั้งแกน X และ Z แปลว่า <b>มุมกล่องอยู่ที่ origin</b> ไม่ใช่จุดกึ่งกลาง
+            กล้อง preview ที่ orbit รอบ origin เลยเห็นก้อนเยื้องตลอด</p>
+          <pre>x -= float(NX)    * 0.5 * uPitch.x;   // NX = pixel ต่อชั้น
+y -= float(H - 1) * 0.5 * uPitch.y;   // H  = Height
+z -= float(NZ)    * 0.5 * uPitch.x;   // NZ = จำนวนชั้น</pre>
+          <div class="stats">
+            <div class="stat"><div class="k">X / Z</div><div class="v" id="cX" style="font-size:15px">0.031 → 4.469</div></div>
+            <div class="stat"><div class="k">Y</div><div class="v" id="cY" style="font-size:15px">0 → 2.999</div></div>
+          </div>
+          <div class="note"><b>ทำไม Y ใช้ H−1:</b> แถวล่างสุดอยู่ที่ <span class="mono">0·pitch</span> พอดี (ไม่มี +0.5 เหมือน X/Z)
+            ถ้าใช้ H จะเยื้องลงครึ่งเม็ด · <b>ไม่กระทบ Art-Net</b> เพราะ pixel mapping อ้างจาก index ไม่ใช่พิกัด</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 ============ -->
+  <section>
+    <div class="h2"><span class="n">5</span> ผลวัดจริง — คอขวดย้ายที่แล้ว</div>
+    <div class="card">
+      <p class="lead">ทุกตัวเลขวัดด้วย wall-clock (force cook ซ้ำ 5–20 รอบ) ไม่ใช่ <span class="mono">cookTime</span>
+        ซึ่งค้างค่าตอน compile ครั้งแรก</p>
+      <div id="bars"></div>
+      <table style="margin-top:16px">
+        <tr><th>งาน</th><th>2×2 (12 ชั้น)</th><th>12×12 (72 ชั้น)</th><th>เพิ่มขึ้น</th></tr>
+        <tr><td>LED</td><td>6,912</td><td><b>248,832</b></td><td>36×</td></tr>
+        <tr><td>เรนเดอร์ LED @4K</td><td>—</td><td><b>0.093 ms</b></td><td>แทบไม่ขยับ</td></tr>
+        <tr><td>content: POP scene (สไลซ์)</td><td>2.95 ms</td><td><b>20.6 ms</b></td><td>7×</td></tr>
+        <tr><td>content: GLSL generator</td><td>—</td><td><b>0.67 ms</b></td><td>—</td></tr>
+      </table>
+      <div class="note"><b>สรุป:</b> จำนวน LED ไม่ใช่ปัญหา (ไม่มี GPU→CPU readback แล้ว) —
+        ตัวที่แพงคือ <b>จำนวนชั้น</b> เพราะ scene ถูก submit ใหม่ทุก renderpass (~0.29 ms/ชั้น)
+        ถ้าต้องการ 60fps ที่ 72 ชั้น ต้องลดชั้น หรือใช้ content ที่วาดจากพิกัด pixel ตรงๆ (<span class="mono">Contentsrc = glsl</span>)</div>
+    </div>
+  </section>
+
+  <!-- ============ 6 ============ -->
+  <section>
+    <div class="h2"><span class="n">6</span> Gotcha ที่เจ็บมาแล้ว</div>
+    <div class="card">
+      <div class="grow"><div class="gi">💥</div><div><b><span class="mono">.eval()</span> บน OP-path param ลาก cook ทั้งสาย</b><br>
+        <span class="mono">render.par.camera.eval()</span> ทำ bridge timeout 10 วิ <b>และ WebSocket DAT หลุด</b> → อ่านด้วย <span class="mono">.val</span> เสมอ</div></div>
+      <div class="grow"><div class="gi">📐</div><div><b>ลำดับ output connector ของ COMP เรียงตาม nodeY ไม่ใช่ชื่อ</b><br>
+        สร้าง out ใหม่ต้องวาง Y ต่อเนื่อง ไม่งั้น layout ต่อสลับชั้นแบบเงียบๆ</div></div>
+      <div class="grow"><div class="gi">🎯</div><div><b><span class="mono">parameterexecuteDAT.par.op = '.'</span> คือตัว DAT เอง</b><br>
+        ต้องใช้ <span class="mono">'..'</span> ถึงจะเป็น COMP ที่มันอยู่ — ผิดตรงนี้ callback เงียบสนิท ไม่มี error</div></div>
+      <div class="grow"><div class="gi">🕰️</div><div><b>par ที่เป็น expression ไม่ trigger onValueChange</b><br>
+        เปลี่ยน Modz แล้ว Layers ขยับตาม แต่ callback ไม่ fire → ต้องมี pulse ให้กดเอง</div></div>
+      <div class="grow"><div class="gi">🧊</div><div><b>constantCHOP / glslTOP ที่ static ค้างค่าเก่า</b><br>
+        <span class="mono">ref['layers']</span> ยัง 12 ทั้งที่ Layers = 72 จนกว่าจะ <span class="mono">cook(force=True)</span></div></div>
+      <div class="grow"><div class="gi">🔗</div><div><b>copy COMP แล้ว absolute path ไม่ถูก rewrite</b><br>
+        6 จุด: <span class="mono">geo1.instanceop / instancecolorop / material</span> · <span class="mono">render1.camera / geometry / lights</span> ยังชี้ container เดิม</div></div>
+      <div class="grow"><div class="gi">🌑</div><div><b>248k เม็ดทึบ = ก้อนดำ</b><br>
+        ต้องใช้ additive: <span class="mono">SimMat blending=On · srcblend='sa' · destblend='one' · depthwriting=Off</span> + <span class="mono">geo1.instancea='a'</span></div></div>
+      <div class="grow"><div class="gi">🎬</div><div><b>เทียบภาพ scene ที่แอนิเมทไม่ได้</b><br>
+        ตั้ง <span class="mono">me.time.play = 0</span> ก่อนทดสอบ ไม่งั้นแยกไม่ออกว่าภาพเปลี่ยนเพราะพารามิเตอร์หรือเพราะเวลา</div></div>
+    </div>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section>
+    <div class="h2"><span class="n">7</span> สร้างใหม่ได้จากสคริปต์</div>
+    <div class="card">
+      <pre>python td.py script ../ClaudeControl/build/01_baseMatrix2x2GPU.py    # GPU version 2×2
+python td.py script ../ClaudeControl/build/03_slices_auto.py         # auto slice rig + camRig (ทั้ง 2 container)
+python td.py script ../ClaudeControl/build/02_baseMatrix12x12GPU.py  # 12×12 = 248,832 LED</pre>
+      <div class="note">ทุกสคริปต์ idempotent — รันซ้ำได้ · ตรรกะ rebuild ถูกฝังไว้ในไฟล์ <span class="mono">.toe</span> แล้ว
+        (<span class="mono">slices_build</span>) จึงทำงานต่อได้แม้ไม่มี bridge</div>
+    </div>
+  </section>
+
+  <footer>27JUNE STUDIO · LEDMatrixSystem · สำรวจ + สร้างผ่าน ClaudeControl bridge (WS 9981) · 2026-08-26</footer>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const TAU = Math.PI * 2;
+
+function setup(cv){
+  const ctx = cv.getContext('2d');
+  const size = () => {
+    const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    cv._w = r.width; cv._h = r.height;
+  };
+  size();
+  window.addEventListener('resize', () => { size(); if (cv._draw) cv._draw(); });
+  return ctx;
+}
+function drag(cv, state){
+  let on = false, px = 0, py = 0;
+  const dn = e => { on = true; px = (e.touches ? e.touches[0].clientX : e.clientX); py = (e.touches ? e.touches[0].clientY : e.clientY); };
+  const mv = e => {
+    if (!on) return;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX), y = (e.touches ? e.touches[0].clientY : e.clientY);
+    state.ry += (x - px) * 0.01; state.rx = Math.max(-1.2, Math.min(1.2, state.rx + (y - py) * 0.008));
+    px = x; py = y; if (cv._draw) cv._draw();
+    if (e.touches) e.preventDefault();
+  };
+  const up = () => { on = false; };
+  cv.addEventListener('mousedown', dn); window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
+  cv.addEventListener('touchstart', dn, {passive:true}); cv.addEventListener('touchmove', mv, {passive:false}); cv.addEventListener('touchend', up);
+}
+// 3D -> 2D (yaw, pitch, mild perspective)
+function projector(rx, ry, scale, ox, oy){
+  const cy = Math.cos(ry), sy = Math.sin(ry), cx = Math.cos(rx), sx = Math.sin(rx);
+  return p => {
+    const x1 = p[0]*cy + p[2]*sy, z1 = -p[0]*sy + p[2]*cy;
+    const y1 = p[1]*cx - z1*sx,   z2 = p[1]*sx + z1*cx;
+    const f = 1 / (1 + z2 * 0.16);
+    return [ox + x1*scale*f, oy - y1*scale*f, z2];
+  };
+}
+const fmt = n => n.toLocaleString('en-US');
+
+/* ================= 1. RIG BUILDER ================= */
+(function(){
+  const cv = $('#rig'), ctx = setup(cv), st = {rx:0.42, ry:-0.62};
+  drag(cv, st);
+  let mod = 2;
+
+  function stats(){
+    const layers = mod * 6, slicew = mod * 6;
+    const led = layers * slicew * 48;
+    $('#vMod').textContent = mod + ' × ' + mod;
+    $('#sLayers').textContent = layers;
+    $('#sSlicew').textContent = slicew;
+    $('#sLed').textContent = fmt(led);
+    $('#sTex').textContent = fmt(slicew * layers) + '×48';
+    $('#sNodes').textContent = fmt(layers * 3);
+    const hrs = layers * 3 * 2 / 60;
+    $('#sTime').textContent = (hrs < 1 ? Math.round(hrs * 60) + ' ' + LMX.t('นาที') : hrs.toFixed(1) + ' ' + LMX.t('ชม.'));
+  }
+
+  cv._draw = function(){
+    const W = cv._w, H = cv._h;
+    ctx.clearRect(0, 0, W, H);
+    const layers = mod * 6;
+    const P = projector(st.rx, st.ry, Math.min(W, H) * 0.30, W / 2, H / 2 + 6);
+    const quads = [];
+    for (let i = 0; i < layers; i++){
+      const t = (i + 0.5) / layers, z = -1 + 2 * t;
+      const c = [[-1,-0.66,z],[1,-0.66,z],[1,0.66,z],[-1,0.66,z]].map(P);
+      quads.push({z: c[0][2], c, t});
+    }
+    quads.sort((a, b) => b.z - a.z);
+    for (const q of quads){
+      ctx.beginPath();
+      ctx.moveTo(q.c[0][0], q.c[0][1]);
+      for (let k = 1; k < 4; k++) ctx.lineTo(q.c[k][0], q.c[k][1]);
+      ctx.closePath();
+      const hue = 190 + q.t * 120;
+      ctx.fillStyle = 'hsla(' + hue + ',85%,60%,' + (0.055 + 0.10 / Math.sqrt(layers)) + ')';
+      ctx.fill();
+      ctx.strokeStyle = 'hsla(' + hue + ',85%,66%,' + (layers > 30 ? 0.20 : 0.42) + ')';
+      ctx.lineWidth = 1; ctx.stroke();
+    }
+    // cameras in front
+    const shown = Math.min(layers, 12), step = layers / shown;
+    for (let s = 0; s < shown; s++){
+      const i = Math.floor(s * step), t = (i + 0.5) / layers, z = -1 + 2 * t;
+      const cam = P([-1.55 + 0.02 * s, -0.66 + 1.32 * (s / Math.max(1, shown - 1)), 1.75]);
+      const tgt = P([-1, -0.66 + 1.32 * (s / Math.max(1, shown - 1)), z]);
+      ctx.strokeStyle = 'rgba(74,168,255,.22)'; ctx.setLineDash([3, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cam[0], cam[1]); ctx.lineTo(tgt[0], tgt[1]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#4aa8ff';
+      ctx.beginPath(); ctx.arc(cam[0], cam[1], 3.4, 0, TAU); ctx.fill();
+    }
+    ctx.fillStyle = '#8e9bb8'; ctx.font = '12px Consolas,monospace';
+    ctx.fillText(LMX.t('{n} ชั้น · กล้อง {n} ตัว').replace(/\{n\}/g, layers) + (layers > 12 ? ' ' + LMX.t('(แสดง 12)') : ''), 12, 20);
+    stats();
+  };
+  $('#rMod').addEventListener('input', e => { mod = +e.target.value; cv._draw(); });
+  cv._draw();
+})();
+
+/* ================= 2. camRig CAPTURE ================= */
+(function(){
+  const cvA = $('#capture'), a = setup(cvA);
+  const cvB = $('#captured'), b = setup(cvB);
+  let zoom = 1, rot = 0, pan = 0, dep = 0;
+
+  // scene: ring + two blobs, world coords (top view X-Z)
+  const pts = [];
+  for (let i = 0; i < 260; i++){
+    const t = i / 260 * TAU, r = 0.62 + 0.055 * Math.sin(t * 5);
+    pts.push({x: Math.cos(t) * r, z: Math.sin(t) * r * 0.78, h: (t / TAU)});
+  }
+  for (let i = 0; i < 90; i++){
+    const t = Math.random() * TAU, r = Math.sqrt(Math.random()) * 0.19;
+    pts.push({x: -0.42 + Math.cos(t) * r, z: 0.34 + Math.sin(t) * r, h: 0.08});
+    pts.push({x: 0.5 + Math.cos(t) * r * 0.8, z: -0.36 + Math.sin(t) * r * 0.8, h: 0.55});
+  }
+  const col = h => 'hsl(' + Math.round(180 + h * 150) + ',85%,64%)';
+
+  function draw(){
+    // ---------- left: world + capture box ----------
+    const W = cvA._w, H = cvA._h, S = Math.min(W, H) * 0.40, cx = W / 2, cy = H / 2;
+    a.clearRect(0, 0, W, H);
+    a.strokeStyle = 'rgba(255,255,255,.07)'; a.lineWidth = 1;
+    for (let g = -2; g <= 2; g++){
+      a.beginPath(); a.moveTo(cx + g * S * 0.5, 0); a.lineTo(cx + g * S * 0.5, H); a.stroke();
+      a.beginPath(); a.moveTo(0, cy + g * S * 0.5); a.lineTo(W, cy + g * S * 0.5); a.stroke();
+    }
+    for (const p of pts){
+      a.fillStyle = col(p.h);
+      a.globalAlpha = 0.85;
+      a.beginPath(); a.arc(cx + p.x * S, cy + p.z * S, 2.1, 0, TAU); a.fill();
+    }
+    a.globalAlpha = 1;
+    // capture box (rotated square, side = zoom)
+    const th = rot * Math.PI / 180, c = Math.cos(th), s = Math.sin(th), hz = zoom / 2;
+    const corners = [[-hz,-hz],[hz,-hz],[hz,hz],[-hz,hz]].map(q => {
+      const x = q[0] * c - q[1] * s + pan, z = q[0] * s + q[1] * c + dep;
+      return [cx + x * S, cy + z * S];
+    });
+    a.strokeStyle = '#4aa8ff'; a.lineWidth = 2;
+    a.beginPath(); a.moveTo(corners[0][0], corners[0][1]);
+    for (let k = 1; k < 4; k++) a.lineTo(corners[k][0], corners[k][1]);
+    a.closePath(); a.stroke();
+    a.fillStyle = 'rgba(74,168,255,.08)'; a.fill();
+    // slab lines inside the box
+    a.strokeStyle = 'rgba(74,168,255,.22)'; a.lineWidth = 1;
+    for (let i = 1; i < 8; i++){
+      const u = -hz + zoom * i / 8;
+      const p1 = [-hz * c - u * s + pan, -hz * s + u * c + dep];
+      const p2 = [ hz * c - u * s + pan,  hz * s + u * c + dep];
+      a.beginPath(); a.moveTo(cx + p1[0] * S, cy + p1[1] * S); a.lineTo(cx + p2[0] * S, cy + p2[1] * S); a.stroke();
+    }
+    a.fillStyle = '#4aa8ff'; a.font = '12px Consolas,monospace';
+    a.fillText('capture box  ' + zoom.toFixed(2) + ' × ' + zoom.toFixed(2), 12, 20);
+
+    // ---------- right: what lands in the LED volume ----------
+    const W2 = cvB._w, H2 = cvB._h, S2 = Math.min(W2, H2) * 0.78, ox = W2 / 2 - S2 / 2, oy = H2 / 2 - S2 / 2;
+    b.clearRect(0, 0, W2, H2);
+    const N = 26, cell = S2 / N;
+    const grid = new Array(N * N).fill(null);
+    for (const p of pts){
+      // world -> box local (inverse rotate, then normalise by zoom)
+      const dx = p.x - pan, dz = p.z - dep;
+      const lx = ( dx * c + dz * s) / zoom, lz = (-dx * s + dz * c) / zoom;
+      if (Math.abs(lx) > 0.5 || Math.abs(lz) > 0.5) continue;
+      const gx = Math.min(N - 1, Math.max(0, Math.floor((lx + 0.5) * N)));
+      const gz = Math.min(N - 1, Math.max(0, Math.floor((lz + 0.5) * N)));
+      grid[gz * N + gx] = p.h;
+    }
+    let lit = 0;
+    for (let gz = 0; gz < N; gz++) for (let gx = 0; gx < N; gx++){
+      const v = grid[gz * N + gx];
+      const px = ox + gx * cell + cell / 2, py = oy + gz * cell + cell / 2;
+      if (v === null){
+        b.fillStyle = 'rgba(255,255,255,.055)';
+        b.beginPath(); b.arc(px, py, 1.5, 0, TAU); b.fill();
+      } else {
+        lit++;
+        b.fillStyle = col(v);
+        b.beginPath(); b.arc(px, py, cell * 0.30, 0, TAU); b.fill();
+        b.globalAlpha = .28; b.beginPath(); b.arc(px, py, cell * 0.52, 0, TAU); b.fill(); b.globalAlpha = 1;
+      }
+    }
+    b.strokeStyle = 'rgba(55,230,180,.45)'; b.lineWidth = 1.5;
+    b.strokeRect(ox, oy, S2, S2);
+    b.fillStyle = '#37e6b4'; b.font = '12px Consolas,monospace';
+    b.fillText(LMX.t('LED ติด {a} / {b}').replace('{a}', lit).replace('{b}', N * N), 12, 20);
+  }
+  cvA._draw = draw; cvB._draw = draw;
+
+  $('#rZoom').addEventListener('input', e => { zoom = +e.target.value / 100; $('#vZoom').textContent = zoom.toFixed(2); draw(); });
+  $('#rRot').addEventListener('input',  e => { rot = +e.target.value; $('#vRot').textContent = rot + '°'; draw(); });
+  $('#rPan').addEventListener('input',  e => { pan = +e.target.value / 100; $('#vPan').textContent = pan.toFixed(2); draw(); });
+  $('#rDep').addEventListener('input',  e => { dep = +e.target.value / 100; $('#vDep').textContent = dep.toFixed(2); draw(); });
+  draw();
+})();
+
+/* ================= 3. ASPECT TRAP ================= */
+(function(){
+  const cv = $('#aspect'), ctx = setup(cv);
+  let mod = 2, fit = false;
+
+  cv._draw = function(){
+    const W = cv._w, H = cv._h;
+    ctx.clearRect(0, 0, W, H);
+    const slicew = mod * 6;
+    const frameH = 48 / slicew;             // world height the camera can see
+    const sceneH = 4 * (fit ? 12 / slicew : 1);
+    const sceneW = 0.8 * (fit ? 1 : 1);
+    const S = Math.min(W * 0.62, H * 0.80) / Math.max(frameH, Math.min(sceneH, 8), 1.2);
+    const cx = W / 2, cy = H / 2;
+
+    // scene (green) — a tall totem shape
+    ctx.fillStyle = 'rgba(55,230,180,.20)';
+    ctx.strokeStyle = 'rgba(55,230,180,.75)'; ctx.lineWidth = 1.6;
+    const sw = sceneW * S, sh = sceneH * S;
+    ctx.beginPath();
+    ctx.roundRect(cx - sw / 2, cy - sh / 2, sw, sh, Math.min(12, sw / 3));
+    ctx.fill(); ctx.stroke();
+    for (let i = 0; i < 9; i++){
+      const y = cy - sh / 2 + sh * (i + 0.5) / 9;
+      ctx.fillStyle = 'rgba(55,230,180,' + (0.25 + 0.5 * Math.abs(Math.sin(i * 1.1))) + ')';
+      const w = sw * (0.35 + 0.45 * Math.abs(Math.sin(i * 0.8)));
+      ctx.fillRect(cx - w / 2, y - sh / 42, w, sh / 21);
+    }
+    // camera frame (blue)
+    const fw = 1 * S, fh = frameH * S;
+    ctx.strokeStyle = '#4aa8ff'; ctx.lineWidth = 2.2;
+    ctx.setLineDash([6, 4]); ctx.strokeRect(cx - fw / 2, cy - fh / 2, fw, fh); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(74,168,255,.07)'; ctx.fillRect(cx - fw / 2, cy - fh / 2, fw, fh);
+
+    const clipped = sceneH > frameH * 1.02;
+    ctx.fillStyle = clipped ? '#ff5d8f' : '#37e6b4';
+    ctx.font = 'bold 13px Consolas,monospace';
+    ctx.fillText(LMX.t(clipped ? '⚠ scene หลุดกรอบ → renderpass ดำ' : '✓ scene อยู่ในกรอบ'), 12, 22);
+    ctx.fillStyle = '#8e9bb8'; ctx.font = '11.5px Consolas,monospace';
+    ctx.fillText(LMX.t('กรอบกล้อง 1 × {h}').replace('{h}', frameH.toFixed(2)), 12, H - 14);
+    ctx.fillText(LMX.t('scene สูง {h}').replace('{h}', sceneH.toFixed(2)), 12, H - 30);
+
+    $('#vAMod').textContent = mod;
+    $('#sSlice').textContent = slicew + ' × 48';
+    $('#sFrame').textContent = '1 × ' + frameH.toFixed(2);
+    $('#sScene').textContent = sceneH.toFixed(2);
+    const v = $('#sVerdict'), note = $('#aspectNote');
+    if (clipped){
+      v.textContent = 'ดำ'; v.style.color = '#ff5d8f';
+      note.className = 'note bad';
+      note.innerHTML = LMX.t('<b>หลุดกรอบ!</b> scene สูง {s} แต่กล้องเห็นแค่ {f} → ทุก renderpass ได้ภาพดำ · texture ออกมาเป็น 0 ทั้งแผ่น แต่ <b>TD ไม่ฟ้อง error</b>')
+        .replace('{s}', sceneH.toFixed(2)).replace('{f}', frameH.toFixed(2));
+    } else {
+      v.textContent = 'พอดี'; v.style.color = '#37e6b4';
+      note.className = 'note';
+      note.innerHTML = LMX.t('<b>พอดีกรอบ</b> — scene สูง {s} · กรอบสูง {f}')
+        .replace('{s}', sceneH.toFixed(2)).replace('{f}', frameH.toFixed(2)) +
+        (fit ? ' ' + LMX.t('<br>(ได้จาก <span class="mono">geo2.sy = 12 / Slicew = {v}</span> — ผลคือ scene ถูกบีบแนวตั้งให้พอดี volume ทรงกว้าง)')
+          .replace('{v}', (12 / slicew).toFixed(3)) : '');
+    }
+  };
+  $('#rAMod').addEventListener('input', e => { mod = +e.target.value; cv._draw(); });
+  $('#cFit').addEventListener('change', e => { fit = e.target.checked; cv._draw(); });
+  cv._draw();
+})();
+
+/* ================= 4. CENTERING ================= */
+(function(){
+  const cv = $('#center'), ctx = setup(cv), st = {rx:0.38, ry:-0.7};
+  drag(cv, st);
+  let centered = false;
+
+  cv._draw = function(){
+    const W = cv._w, H = cv._h;
+    ctx.clearRect(0, 0, W, H);
+    const S = Math.min(W, H) * 0.16;
+    const P = projector(st.rx, st.ry, S, W / 2, H / 2 + 10);
+    const w = 4.5, h = 3.0, d = 4.5;
+    const o = centered ? [-w/2, -h/2, -d/2] : [0, 0, 0];
+    // axes
+    const A = 3.4;
+    const ax = [[[-A,0,0],[A,0,0],'#ff5d8f'], [[0,-A,0],[0,A,0],'#37e6b4'], [[0,0,-A],[0,0,A],'#4aa8ff']];
+    for (const [p1, p2, c] of ax){
+      const s1 = P(p1), s2 = P(p2);
+      ctx.strokeStyle = c; ctx.globalAlpha = .55; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(s1[0], s1[1]); ctx.lineTo(s2[0], s2[1]); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    const or = P([0,0,0]);
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(or[0], or[1], 3.2, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#8e9bb8'; ctx.font = '11px Consolas,monospace'; ctx.fillText('origin', or[0] + 7, or[1] - 6);
+
+    // LED volume as dot cloud (sparse) + wire box
+    const nx = 9, ny = 7, nz = 9;
+    const dots = [];
+    for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) for (let k = 0; k < nz; k++){
+      const p = [o[0] + w * i / (nx-1), o[1] + h * j / (ny-1), o[2] + d * k / (nz-1)];
+      const s = P(p);
+      dots.push({s, hue: 190 + 130 * (j / (ny-1))});
+    }
+    dots.sort((p, q) => q.s[2] - p.s[2]);
+    for (const dd of dots){
+      ctx.fillStyle = 'hsla(' + dd.hue + ',85%,62%,.55)';
+      ctx.beginPath(); ctx.arc(dd.s[0], dd.s[1], 2.1, 0, TAU); ctx.fill();
+    }
+    const corners = [[0,0,0],[w,0,0],[w,h,0],[0,h,0],[0,0,d],[w,0,d],[w,h,d],[0,h,d]]
+      .map(p => P([p[0]+o[0], p[1]+o[1], p[2]+o[2]]));
+    const edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    ctx.strokeStyle = centered ? 'rgba(55,230,180,.75)' : 'rgba(255,93,143,.7)';
+    ctx.lineWidth = 1.3;
+    for (const [i, j] of edges){
+      ctx.beginPath(); ctx.moveTo(corners[i][0], corners[i][1]); ctx.lineTo(corners[j][0], corners[j][1]); ctx.stroke();
+    }
+    ctx.fillStyle = centered ? '#37e6b4' : '#ff5d8f'; ctx.font = 'bold 13px Consolas,monospace';
+    ctx.fillText(LMX.t(centered ? '✓ กล่องอยู่กลาง origin' : '⚠ มุมกล่องอยู่ที่ origin'), 12, 22);
+
+    $('#cX').textContent = centered ? '−2.219 → 2.219' : '0.031 → 4.469';
+    $('#cY').textContent = centered ? '−1.499 → 1.499' : '0 → 2.999';
+    $('#bOn').classList.toggle('on', centered);
+    $('#bOff').classList.toggle('on', !centered);
+  };
+  $('#bOn').addEventListener('click', () => { centered = true; cv._draw(); });
+  $('#bOff').addEventListener('click', () => { centered = false; cv._draw(); });
+  cv._draw();
+})();
+
+/* ================= 5. PERF BARS ================= */
+(function(){
+  const rows = [
+    ['เรนเดอร์ LED 248,832 @4K', 0.093, false],
+    ['content GLSL (72 ชั้น)', 0.67, false],
+    ['content POP scene (12 ชั้น)', 2.95, false],
+    ['content POP scene (72 ชั้น)', 20.6, true],
+    ['งบเวลา 1 เฟรม @60fps', 16.7, false]
+  ];
+  const max = 22;
+  $('#bars').innerHTML = rows.map(([nm, v, hot]) => {
+    const budget = nm.indexOf('งบเวลา') === 0;
+    const style = 'width:' + (v / max * 100).toFixed(1) + '%' +
+      (budget ? ';background:repeating-linear-gradient(90deg,#2a3550 0 6px,#0a1120 6px 12px)' : '');
+    return '<div class="bar"><div class="nm">' + nm + '</div>' +
+      '<div class="tr"><div class="fl' + (hot ? ' hot' : '') + '" style="' + style + '"></div></div>' +
+      '<div class="vv">' + v.toFixed(v < 1 ? 3 : 2) + ' ms</div></div>';
+  }).join('');
+})();
+if (window.LMX) LMX.onLang(function(){
+  ['rig','capture','captured','aspect','center'].forEach(function(id){
+    var c = document.getElementById(id); if (c && c._draw) c._draw();
+  });
+});
+</script>
+</body>
+</html>

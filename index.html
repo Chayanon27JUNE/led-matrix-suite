@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LED Matrix Suite — 3D LED Simulation</title>
+<style>
+  :root{
+    --bg:#070a12; --panel:#0e1420; --panel2:#141c2e; --line:#22304c;
+    --txt:#e4ebf7; --muted:#8e9bb8; --accent:#4aa8ff; --accent2:#37e6b4; --hot:#ff5d8f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:radial-gradient(1100px 680px at 70% -14%,#0f1d33 0%,var(--bg) 58%);
+    color:var(--txt);font-family:"Segoe UI",Tahoma,system-ui,sans-serif;line-height:1.55}
+  .wrap{max-width:1080px;margin:0 auto;padding:34px 20px 90px}
+  header.hero{text-align:center;padding:26px 10px 6px}
+  .kicker{letter-spacing:.26em;font-size:11.5px;color:var(--accent);text-transform:uppercase;font-weight:700}
+  h1{font-size:clamp(28px,4.4vw,46px);margin:.22em 0 .12em;
+     background:linear-gradient(90deg,#fff,var(--accent) 50%,var(--accent2));
+     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:var(--muted);max-width:730px;margin:.5em auto 0;font-size:14.5px}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 4px}
+  .badge{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--muted)}
+  .badge b{color:var(--accent2)}
+  .lbl{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;margin:34px 0 12px;text-align:center}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:880px){.cards{grid-template-columns:1fr}}
+  a.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;
+    background:linear-gradient(180deg,var(--panel),#0a0f19);border:1px solid var(--line);
+    border-radius:16px;padding:20px;transition:.16s}
+  a.card:hover{transform:translateY(-4px);border-color:var(--accent);
+    box-shadow:0 18px 40px -22px var(--accent)}
+  .num{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:13px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121a}
+  a.card h3{margin:12px 0 6px;font-size:17px}
+  a.card p{margin:0;color:var(--muted);font-size:13px;flex:1}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+  .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  .go{margin-top:14px;font-size:12.5px;font-weight:700;color:var(--accent2)}
+  .note{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent2);
+    border-radius:0 11px 11px 0;padding:12px 15px;font-size:13px;color:var(--muted);margin-top:26px}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px}
+</style>
+<link rel="stylesheet" href="assets/lmx.css">
+<script src="assets/i18n.js"></script>
+<script src="assets/lmx.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">TouchDesigner 2025 · 27JUNE STUDIO</div>
+    <h1>LED Matrix Suite</h1>
+    <p class="sub">ชุดเอกสาร interactive ของระบบจอ LED สามมิติ — ตั้งแต่หลักการสไลซ์ volume, การขยายสเกลถึง 248,832 ดวง, ไปจนถึงผังติดตั้งจริง 144 โมดูล</p>
+    <div class="badges">
+      <span class="badge">grid <b>72×72×48</b></span>
+      <span class="badge"><b>248,832</b> LED</span>
+      <span class="badge"><b>144</b> modules</span>
+      <span class="badge"><b>1,584</b> universes</span>
+      <span class="badge"><b>6×6</b> m</span>
+    </div>
+  </header>
+
+  <div class="lbl">อ่านตามลำดับนี้</div>
+
+  <div class="cards">
+    <a class="card" href="system.html">
+      <div class="num">1</div>
+      <h3>Volumetric Slicing</h3>
+      <p>หลักการของระบบ — กล้อง ortho 12 ตัวตัด volume เป็นชั้น เรียงเป็น texture แล้วส่ง Art-Net · มี demo สด 3 ช่องต่อกันทั้ง pipeline</p>
+      <div class="tags"><span class="tag">12 layers</span><span class="tag">6,912 LED</span><span class="tag">Art-Net</span></div>
+      <div class="go">เริ่มอ่าน →</div>
+    </a>
+
+    <a class="card" href="scale.html">
+      <div class="num">2</div>
+      <h3>Scaling &amp; Slice Cameras</h3>
+      <p>ทำให้ระบบสร้างชั้นเองอัตโนมัติจนถึง 248,832 ดวง · คุมมุมกล้องสไลซ์ · กับดักสัดส่วนที่ทำให้จอดำโดยไม่มี error</p>
+      <div class="tags"><span class="tag">72 layers</span><span class="tag">248,832 LED</span><span class="tag">camRig</span></div>
+      <div class="go">เริ่มอ่าน →</div>
+    </a>
+
+    <a class="card" href="diagram.html">
+      <div class="num">3</div>
+      <h3>Install Map</h3>
+      <p>ผังติดตั้งจริง 6×6 เมตร — 144 โมดูล, universe, IP, การเดินสาย และระบบไฟ</p>
+      <div class="tags"><span class="tag">144 modules</span><span class="tag">wiring</span><span class="tag">power</span></div>
+      <div class="go">เริ่มอ่าน →</div>
+    </a>
+  </div>
+
+  <div class="note">ทั้งหมดสร้าง + สำรวจผ่าน ClaudeControl bridge (WebSocket 9981) บน TouchDesigner 2025.32820</div>
+
+  <footer>27JUNE STUDIO · LEDMatrixSystem · 2026-08-26</footer>
+</div>
+</body>
+</html>
