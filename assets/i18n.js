@@ -389,5 +389,34 @@ window.LMX_EN = {
 '<b>{c} × {r} = {w} × {h}</b> — เหลือช่องว่าง {e} ช่อง (กรอบชมพู) ต้องเติมดำไว้':
   '<b>{c} × {r} = {w} × {h}</b> — {e} cells left over (pink outline); fill them with black',
 '<b>แถบยาว 5,184 × 48</b> — ใช้ได้แต่ยาวมาก พรีวิว/ตัดต่อลำบาก และโปรแกรมตัดต่อหลายตัวไม่รับความกว้างระดับนี้':
-  '<b>Long strip 5,184 × 48</b> — usable, but unwieldy to preview and edit, and many editors refuse a canvas this wide'
+  '<b>Long strip 5,184 × 48</b> — usable, but unwieldy to preview and edit, and many editors refuse a canvas this wide',
+/* ---------- system.html §3b : shape slicing examples ---------- */
+'🧪 ตัวอย่างจริง — รูปทรง 3D → 72 แผ่น → 576 × 432': '🧪 Worked example — a 3D shape → 72 slices → 576 × 432',
+'เลือกทรงแล้วดูว่ามันถูกหั่นออกมาหน้าตายังไง · ภาพขวาล่างคือ':
+  'Pick a shape and watch how it gets sliced · the sheet below is the',
+'ไฟล์จริงขนาด 576 × 432': 'actual 576 × 432 file',
+'ที่จะส่งเข้าระบบ (กดดาวน์โหลดเอาไปเปิดใน After Effects / Photoshop ดูได้เลย)':
+  'that goes into the system — download it and open it in After Effects or Photoshop to see the format.',
+'🛢️ กระบอก': '🛢️ Cylinder',
+'เปลือกบาง (กลวง)': 'Thin shell (hollow)',
+'ไล่สีตามความลึก': 'Colour by depth',
+'ไล่แผ่นอัตโนมัติ': 'Cycle through slices',
+'⬇ ดาวน์โหลด PNG 576 × 432': '⬇ Download PNG 576 × 432',
+'🖱️ ลากหมุนได้ ·': '🖱️ Drag to orbit ·',
+'ทรงจริงในก้อน LED 72×72×48': 'the shape inside the 72×72×48 LED volume',
+'· ระนาบสีขาว = แผ่นที่กำลังดู': '· the white plane is the slice you are looking at',
+'แผ่นที่กำลังดู ขยายใหญ่': 'The current slice, magnified',
+'— ขนาดจริง 72 × 48 pixel = 1 ช่องในไฟล์': '— its real size is 72 × 48 px = one tile in the file',
+'แผ่นที่ (ความลึก)': 'Slice (depth)',
+'ไฟล์จริง 576 × 432': 'The real 576 × 432 file',
+'(8 ช่อง × 9 แถว) · กรอบขาว = แผ่นที่กำลังดู · ภาพนี้คือ pixel จริง 1:1 ไม่ได้วาดจำลอง':
+  '(8 tiles × 9 rows) · the white outline marks the current slice · these are real 1:1 pixels, not a mock-up',
+'LED ที่ติดในเฟรมนี้': 'LEDs lit in this frame',
+'คิดเป็น': 'Fill',
+'แผ่นที่มีเนื้อ': 'Slices with content',
+'ไฟล์': 'File',
+'สังเกตว่าทรงกลมไม่ได้ออกมาเป็นวงกลมทุกแผ่น': 'Notice that a sphere is not the same circle on every slice',
+'— แผ่นหน้าสุด/หลังสุดจะเป็นจุดเล็กๆ แล้วค่อยโตขึ้นจนใหญ่สุดตรงกลาง นี่คือหลักการเดียวกับ CT scan · ส่วนกล่องจะได้สี่เหลี่ยมเท่ากันทุกแผ่นในช่วงที่มีเนื้อ และว่างสนิทนอกช่วงนั้น':
+  '— the front and back slices are tiny dots that grow until the widest circle in the middle, exactly like a CT scan. A box instead gives an identical square on every slice inside its range, and nothing at all outside it.',
+'แผ่นที่': 'slice'
 };

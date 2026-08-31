@@ -38,6 +38,12 @@
   #slicer{height:420px;cursor:grab}#slicer:active{cursor:grabbing}
   #atlas{height:150px}
   #pack{height:430px;cursor:pointer}
+  #shp3d,#shpSlice{height:300px}
+  #shp3d{cursor:grab}#shp3d:active{cursor:grabbing}
+  #shpSheet{height:390px;image-rendering:pixelated;margin-top:12px}
+  button.dl{background:var(--panel2);border:1px solid var(--line);color:var(--accent2);border-radius:8px;
+    padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  button.dl:hover{border-color:var(--accent2);color:var(--txt)}
   .ctl{margin-bottom:13px}
   .ctl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:5px}
   .ctl label b{color:var(--accent2);font-variant-numeric:tabular-nums}
@@ -89,9 +95,9 @@
   .grow .gi{font-size:19px}.grow b{color:var(--warn)}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:38px}
 </style>
-<link rel="stylesheet" href="assets/lmx.css?v=2">
-<script src="assets/i18n.js?v=2"></script>
-<script src="assets/lmx.js?v=2"></script>
+<link rel="stylesheet" href="assets/lmx.css?v=3">
+<script src="assets/i18n.js?v=3"></script>
+<script src="assets/lmx.js?v=3"></script>
 </head>
 <body>
 <div class="wrap">
@@ -202,6 +208,52 @@ projection = ortho · orthowidth = 1.0 · tz = 0.5</pre>
       <div class="note">🧭 <b>เช็คทิศทางความลึกก่อนเริ่มงานจริง</b> — ส่งไฟล์ทดสอบที่ชั้นที่ 1 เป็นสีแดงล้วน ชั้นที่ 72 เป็นสีน้ำเงินล้วน ที่เหลือดำ
         แล้วดูของจริงว่าแดงอยู่ด้านหน้าหรือด้านหลัง ถ้ากลับด้านให้สลับลำดับ tile ที่ปลายทาง (แก้ที่ระบบ ไม่ต้องรื้อคอนเทนต์)</div>
 
+
+      <div class="card" style="margin-top:16px">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">🧪 ตัวอย่างจริง — รูปทรง 3D → 72 แผ่น → 576 × 432</div>
+        <p class="lead">เลือกทรงแล้วดูว่ามันถูกหั่นออกมาหน้าตายังไง · ภาพขวาล่างคือ<b>ไฟล์จริงขนาด 576 × 432</b> ที่จะส่งเข้าระบบ (กดดาวน์โหลดเอาไปเปิดใน After Effects / Photoshop ดูได้เลย)</p>
+
+        <div class="seg" id="shpSeg" style="margin-bottom:10px">
+          <button data-s="sphere" class="on">⚪ ทรงกลม</button>
+          <button data-s="box">📦 กล่อง</button>
+          <button data-s="cyl">🛢️ กระบอก</button>
+          <button data-s="torus">🍩 โดนัท</button>
+        </div>
+        <div class="democtl">
+          <label class="toggle" style="margin:0"><input type="checkbox" id="shpShell"> เปลือกบาง (กลวง)</label>
+          <label class="toggle" style="margin:0"><input type="checkbox" id="shpDepthCol" checked> ไล่สีตามความลึก</label>
+          <label class="toggle" style="margin:0"><input type="checkbox" id="shpPlay"> ไล่แผ่นอัตโนมัติ</label>
+          <button class="dl" id="shpDl">⬇ ดาวน์โหลด PNG 576 × 432</button>
+        </div>
+
+        <div class="demo3">
+          <div class="dcell">
+            <canvas id="shp3d"></canvas>
+            <div class="cap">🖱️ ลากหมุนได้ · <b>ทรงจริงในก้อน LED 72×72×48</b> · ระนาบสีขาว = แผ่นที่กำลังดู</div>
+          </div>
+          <div class="dcell">
+            <canvas id="shpSlice"></canvas>
+            <div class="cap"><b>แผ่นที่กำลังดู ขยายใหญ่</b> — ขนาดจริง 72 × 48 pixel = 1 ช่องในไฟล์</div>
+          </div>
+        </div>
+
+        <div class="ctl" style="margin-top:14px"><label>แผ่นที่ (ความลึก) <b id="shpV">1 / 72</b></label>
+          <input type="range" id="shpR" min="1" max="72" value="1"></div>
+
+        <canvas id="shpSheet"></canvas>
+        <div class="cap" style="font-size:11.5px;color:var(--muted);margin-top:7px">
+          <b>ไฟล์จริง 576 × 432</b> (8 ช่อง × 9 แถว) · กรอบขาว = แผ่นที่กำลังดู · ภาพนี้คือ pixel จริง 1:1 ไม่ได้วาดจำลอง</div>
+
+        <div class="stats">
+          <div class="stat"><div class="k">LED ที่ติดในเฟรมนี้</div><div class="v" id="shpLit">—</div></div>
+          <div class="stat"><div class="k">คิดเป็น</div><div class="v" id="shpPct">—</div></div>
+          <div class="stat"><div class="k">แผ่นที่มีเนื้อ</div><div class="v" id="shpNonEmpty">—</div></div>
+          <div class="stat"><div class="k">ไฟล์</div><div class="v" style="font-size:16px">576 × 432</div></div>
+        </div>
+
+        <div class="note">💡 <b>สังเกตว่าทรงกลมไม่ได้ออกมาเป็นวงกลมทุกแผ่น</b> — แผ่นหน้าสุด/หลังสุดจะเป็นจุดเล็กๆ แล้วค่อยโตขึ้นจนใหญ่สุดตรงกลาง
+          นี่คือหลักการเดียวกับ CT scan · ส่วนกล่องจะได้สี่เหลี่ยมเท่ากันทุกแผ่นในช่วงที่มีเนื้อ และว่างสนิทนอกช่วงนั้น</div>
+      </div>
       <div class="note">📐 <b>ทำไมไม่ใช่ 499 × 499:</b> 248,832 = 2¹⁰ × 3⁵ ไม่มีตัวหารที่เป็นจตุรัสพอดี · ตัวหารที่ขนาบรากที่สอง (498.8) คือ 486 กับ 512
         → <code>512 × 486</code> ใกล้จตุรัสที่สุด (1.05:1) แต่จะ<b>หั่นสไลซ์ข้ามบรรทัด</b> มองด้วยตาไม่รู้ว่าชั้นไหนเป็นชั้นไหน · <code>576 × 432</code> จึงใช้งานจริงง่ายกว่า</div>
     </div>
@@ -820,6 +872,198 @@ rs();rsA();rsDemo();stats();drawAtlas();drawSlicer();buildSource();demoStats();l
   })(0);
   rsz(); setPack(8,9);
   if(window.LMX) LMX.onLang(function(){ setPack(PC,PR); });
+})();
+
+/* ===== 3b. shape -> 72 slices -> 576x432 sheet ===== */
+(function(){
+  var NX=72, NY=48, NZ=72, PCX=8, PCY=9;          /* volume + tile grid */
+  var c3=document.getElementById('shp3d'), cS=document.getElementById('shpSlice'), cH=document.getElementById('shpSheet');
+  if(!c3||!cS||!cH) return;
+  var x3=c3.getContext('2d'), xS=cS.getContext('2d'), xH=cH.getContext('2d');
+  var off=document.createElement('canvas'); off.width=NX*PCX; off.height=NY*PCY;
+  var xo=off.getContext('2d');
+  var vox=new Uint8Array(NX*NY*NZ), surf=[], cur=1, shape='sphere', shell=false, depthCol=true, play=false;
+  var lit=0, nonEmpty=0, rotY=-0.62, rotX=0.42;
+
+  function idx(ix,iy,iz){ return (iz*NY+iy)*NX+ix; }
+
+  function build(){
+    var cx=(NX-1)/2, cy=(NY-1)/2, cz=(NZ-1)/2, i, j, k;
+    lit=0;
+    for(k=0;k<NZ;k++) for(j=0;j<NY;j++) for(i=0;i<NX;i++){
+      var x=i-cx, y=j-cy, z=k-cz, on=0, d;
+      if(shape==='sphere'){ d=Math.sqrt(x*x+y*y+z*z); on = shell ? (Math.abs(d-21)<=2.0) : (d<=21); }
+      else if(shape==='box'){ d=Math.max(Math.abs(x),Math.abs(y),Math.abs(z));
+        on = shell ? (d<=20 && d>17) : (d<=20); }
+      else if(shape==='cyl'){ var rr=Math.sqrt(x*x+z*z);
+        on = (Math.abs(y)<=20) && (shell ? (Math.abs(rr-20)<=2.0) : (rr<=20)); }
+      else { var q=Math.sqrt(x*x+z*z)-22; d=Math.sqrt(q*q+y*y); on = shell ? (Math.abs(d-8)<=1.6) : (d<=8); }
+      vox[idx(i,j,k)] = on?1:0; if(on) lit++;
+    }
+    nonEmpty=0;
+    for(k=0;k<NZ;k++){
+      var any=0;
+      for(j=0;j<NY && !any;j++){ for(i=0;i<NX;i++){ if(vox[idx(i,j,k)]){ any=1; break; } } }
+      if(any) nonEmpty++;
+    }
+    surf=[];
+    for(k=1;k<NZ-1;k++) for(j=1;j<NY-1;j++) for(i=1;i<NX-1;i++){
+      if(!vox[idx(i,j,k)]) continue;
+      var edge = !vox[idx(i-1,j,k)]||!vox[idx(i+1,j,k)]||!vox[idx(i,j-1,k)]||
+                 !vox[idx(i,j+1,k)]||!vox[idx(i,j,k-1)]||!vox[idx(i,j,k+1)];
+      if(edge && ((i+j+k)%2===0)) surf.push([i-cx, j-cy, k-cz, k]);
+    }
+    drawSheet(); stats();
+  }
+
+  function colOf(k){
+    var h=(195+125*(k/(NZ-1)))/360, s2=depthCol?0.8:0.0, v=1.0;
+    var i=Math.floor(h*6), f=h*6-i, p=v*(1-s2), q=v*(1-f*s2), t=v*(1-(1-f)*s2), r, g, b;
+    switch(i%6){
+      case 0: r=v; g=t; b=p; break;
+      case 1: r=q; g=v; b=p; break;
+      case 2: r=p; g=v; b=t; break;
+      case 3: r=p; g=q; b=v; break;
+      case 4: r=t; g=p; b=v; break;
+      default: r=v; g=p; b=q;
+    }
+    return [r*255|0, g*255|0, b*255|0];
+  }
+
+  function drawSheet(){
+    var img=xo.createImageData(off.width, off.height), D=img.data;
+    for(var k=0;k<NZ;k++){
+      var tc=k%PCX, tr=(k/PCX)|0, col=colOf(k);
+      for(var j=0;j<NY;j++) for(var i=0;i<NX;i++){
+        var on=vox[idx(i,j,k)];
+        var px=tc*NX+i, py=tr*NY+(NY-1-j);
+        var o=(py*off.width+px)*4;
+        D[o]=on?col[0]:0; D[o+1]=on?col[1]:0; D[o+2]=on?col[2]:0; D[o+3]=255;
+      }
+    }
+    xo.putImageData(img,0,0);
+    paintSheet();
+  }
+
+  function fit(cv,ctx){
+    var d=Math.min(devicePixelRatio||1,2), w=cv.clientWidth, h=cv.clientHeight;
+    cv.width=w*d; cv.height=h*d; ctx.setTransform(d,0,0,d,0,0); return [w,h];
+  }
+
+  function paintSheet(){
+    var wh=fit(cH,xH), W=wh[0], H=wh[1];
+    xH.clearRect(0,0,W,H);
+    var sc=Math.min((W-16)/off.width, (H-24)/off.height), dw=off.width*sc, dh=off.height*sc;
+    var ox=(W-dw)/2, oy=(H-dh)/2+6;
+    xH.imageSmoothingEnabled=false;
+    xH.drawImage(off,ox,oy,dw,dh);
+    xH.strokeStyle='rgba(255,255,255,.14)'; xH.lineWidth=1;
+    for(var c=1;c<PCX;c++){ xH.beginPath(); xH.moveTo(ox+c*NX*sc,oy); xH.lineTo(ox+c*NX*sc,oy+dh); xH.stroke(); }
+    for(var r=1;r<PCY;r++){ xH.beginPath(); xH.moveTo(ox,oy+r*NY*sc); xH.lineTo(ox+dw,oy+r*NY*sc); xH.stroke(); }
+    var tc=(cur-1)%PCX, tr=((cur-1)/PCX)|0;
+    xH.strokeStyle='#fff'; xH.lineWidth=2;
+    xH.strokeRect(ox+tc*NX*sc, oy+tr*NY*sc, NX*sc, NY*sc);
+    xH.fillStyle='#8d99b6'; xH.font='11px Consolas,monospace';
+    xH.fillText(off.width+' x '+off.height, ox, oy-7);
+  }
+
+  function paintSlice(){
+    var wh=fit(cS,xS), W=wh[0], H=wh[1];
+    xS.clearRect(0,0,W,H);
+    var sc=Math.min((W-24)/NX,(H-46)/NY), dw=NX*sc, dh=NY*sc, ox=(W-dw)/2, oy=(H-dh)/2+8;
+    var k=cur-1, col=colOf(k);
+    xS.fillStyle='#05080f'; xS.fillRect(ox,oy,dw,dh);
+    for(var j=0;j<NY;j++) for(var i=0;i<NX;i++){
+      if(!vox[idx(i,j,k)]) continue;
+      xS.fillStyle='rgb('+col[0]+','+col[1]+','+col[2]+')';
+      xS.fillRect(ox+i*sc, oy+(NY-1-j)*sc, Math.max(1,sc-0.35), Math.max(1,sc-0.35));
+    }
+    xS.strokeStyle='rgba(255,255,255,.35)'; xS.lineWidth=1; xS.strokeRect(ox,oy,dw,dh);
+    xS.fillStyle='#8d99b6'; xS.font='11.5px Consolas,monospace';
+    xS.fillText('72 x 48  ·  ' + LMX.t('แผ่นที่') + ' ' + cur, ox, oy-9);
+  }
+
+  function paint3d(){
+    var wh=fit(c3,x3), W=wh[0], H=wh[1];
+    x3.clearRect(0,0,W,H);
+    var sc=Math.min(W,H)*0.0125;
+    var cy=Math.cos(rotY), sy=Math.sin(rotY), cx2=Math.cos(rotX), sx2=Math.sin(rotX);
+    function pr(p){
+      var x1=p[0]*cy+p[2]*sy, z1=-p[0]*sy+p[2]*cy, y1=p[1]*cx2-z1*sx2, z2=p[1]*sx2+z1*cx2;
+      var f=1/(1+z2*0.0045);
+      return [W/2+x1*sc*f, H/2-y1*sc*f, z2];
+    }
+    var hx=NX/2, hy=NY/2, hz=NZ/2;
+    var cs=[[-hx,-hy,-hz],[hx,-hy,-hz],[hx,hy,-hz],[-hx,hy,-hz],[-hx,-hy,hz],[hx,-hy,hz],[hx,hy,hz],[-hx,hy,hz]].map(pr);
+    var eg=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    x3.strokeStyle='rgba(255,255,255,.16)'; x3.lineWidth=1;
+    for(var e=0;e<eg.length;e++){
+      var a=cs[eg[e][0]], b=cs[eg[e][1]];
+      x3.beginPath(); x3.moveTo(a[0],a[1]); x3.lineTo(b[0],b[1]); x3.stroke();
+    }
+    var pts=[];
+    for(var n=0;n<surf.length;n++){ var q=surf[n], s2=pr(q); pts.push([s2[0],s2[1],s2[2],q[3]]); }
+    pts.sort(function(a,b){ return b[2]-a[2]; });
+    for(var n2=0;n2<pts.length;n2++){
+      var pp=pts[n2], cc=colOf(pp[3]);
+      x3.fillStyle='rgba('+cc[0]+','+cc[1]+','+cc[2]+',.85)';
+      x3.fillRect(pp[0]-1.1, pp[1]-1.1, 2.2, 2.2);
+    }
+    var zk=(cur-1)-(NZ-1)/2;
+    var pl=[[-hx,-hy,zk],[hx,-hy,zk],[hx,hy,zk],[-hx,hy,zk]].map(pr);
+    x3.beginPath(); x3.moveTo(pl[0][0],pl[0][1]);
+    for(var m=1;m<4;m++) x3.lineTo(pl[m][0],pl[m][1]);
+    x3.closePath();
+    x3.fillStyle='rgba(255,255,255,.10)'; x3.fill();
+    x3.strokeStyle='rgba(255,255,255,.75)'; x3.lineWidth=1.5; x3.stroke();
+  }
+
+  function stats(){
+    document.getElementById('shpLit').textContent=lit.toLocaleString();
+    document.getElementById('shpPct').textContent=(lit/(NX*NY*NZ)*100).toFixed(1)+'%';
+    document.getElementById('shpNonEmpty').textContent=nonEmpty+' / 72';
+  }
+
+  function setSlice(v){
+    cur=Math.max(1,Math.min(NZ,v|0));
+    document.getElementById('shpR').value=cur;
+    document.getElementById('shpV').textContent=cur+' / 72';
+    paintSlice(); paintSheet(); paint3d();
+  }
+
+  document.getElementById('shpSeg').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children,function(x){ x.classList.toggle('on', x===b); });
+    shape=b.dataset.s; build(); setSlice(cur);
+  });
+  document.getElementById('shpShell').addEventListener('change',function(e){ shell=e.target.checked; build(); setSlice(cur); });
+  document.getElementById('shpDepthCol').addEventListener('change',function(e){ depthCol=e.target.checked; drawSheet(); setSlice(cur); });
+  document.getElementById('shpPlay').addEventListener('change',function(e){ play=e.target.checked; });
+  document.getElementById('shpR').addEventListener('input',function(e){ setSlice(+e.target.value); });
+  document.getElementById('shpDl').addEventListener('click',function(){
+    var a=document.createElement('a');
+    a.download='LEDslices_'+shape+(shell?'_shell':'')+'_576x432.png';
+    a.href=off.toDataURL('image/png');
+    a.click();
+  });
+  (function(){
+    var down=false, px=0, py=0;
+    c3.addEventListener('mousedown',function(e){ down=true; px=e.clientX; py=e.clientY; });
+    addEventListener('mousemove',function(e){
+      if(!down) return;
+      rotY+=(e.clientX-px)*0.01; rotX=Math.max(-1.2,Math.min(1.2,rotX+(e.clientY-py)*0.008));
+      px=e.clientX; py=e.clientY; paint3d();
+    });
+    addEventListener('mouseup',function(){ down=false; });
+  })();
+  addEventListener('resize',function(){ paintSheet(); paintSlice(); paint3d(); });
+  var acc=0, last=0;
+  (function loop(t){
+    if(play){ acc+=(t-last)||0; if(acc>90){ acc=0; setSlice(cur>=NZ?1:cur+1); } }
+    last=t; requestAnimationFrame(loop);
+  })(0);
+  build(); setSlice(1);
+  if(window.LMX) LMX.onLang(function(){ paintSlice(); });
 })();
 
 if(window.LMX) LMX.onLang(function(){ try{drawAtlas();}catch(e){} });
