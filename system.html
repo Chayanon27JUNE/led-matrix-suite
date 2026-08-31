@@ -37,6 +37,7 @@
     background:radial-gradient(600px 380px at 50% 45%,#0d1526,#06080f)}
   #slicer{height:420px;cursor:grab}#slicer:active{cursor:grabbing}
   #atlas{height:150px}
+  #pack{height:430px;cursor:pointer}
   .ctl{margin-bottom:13px}
   .ctl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:5px}
   .ctl label b{color:var(--accent2);font-variant-numeric:tabular-nums}
@@ -88,9 +89,9 @@
   .grow .gi{font-size:19px}.grow b{color:var(--warn)}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:38px}
 </style>
-<link rel="stylesheet" href="assets/lmx.css">
-<script src="assets/i18n.js"></script>
-<script src="assets/lmx.js"></script>
+<link rel="stylesheet" href="assets/lmx.css?v=2">
+<script src="assets/i18n.js?v=2"></script>
+<script src="assets/lmx.js?v=2"></script>
 </head>
 <body>
 <div class="wrap">
@@ -151,9 +152,64 @@ projection = ortho · orthowidth = 1.0 · tz = 0.5</pre>
     </div>
   </section>
 
-  <!-- ========= 3. LIVE DEMO ========= -->
+  <!-- ========= 3. REAL SCALE / CONTENT SPEC ========= -->
   <section>
-    <div class="h2"><span class="n">3</span> ลองเล่นจริง — จากโมเดล 3D สู่เม็ด LED</div>
+    <div class="h2"><span class="n">3</span> ของจริงคือ 72×72×48 — เตรียมคอนเทนต์ยังไง</div>
+    <div class="card">
+      <p class="lead">ที่อธิบายมาข้างบนคือสเกลต้นแบบ 12 ชั้น · <b>ของจริงที่จะติดตั้งคือ 72 (กว้าง) × 72 (ลึก) × 48 (สูง) = 248,832 ดวง</b><br>
+        คอนเทนต์จึงถูกหั่นเป็น <b>สไลซ์ขนาด 72 × 48 จำนวน 72 แผ่น</b> (แผ่นละ 1 ระดับความลึก) — ถ้าวางต่อกันเป็นแถวเดียวจะได้ภาพยาว <b>5,184 × 48</b> ซึ่งยาวเกินไปจนใช้งานลำบาก
+        <b>เอามาเรียงใหม่เป็นตาราง 8 × 9 ได้ภาพ 576 × 432</b> — จำนวน pixel เท่าเดิมเป๊ะ แต่ทรงใกล้เคียงจตุรัส ทำงาน/พรีวิว/เข้ารหัสวิดีโอง่ายกว่ามาก</p>
+
+      <div class="g2">
+        <div>
+          <canvas id="pack"></canvas>
+          <div style="font-size:12px;color:var(--muted);margin-top:8px">🖱️ คลิกช่องไหนก็ได้เพื่อดูว่ามันคือชั้นความลึกไหน · แถบบน = ภาพยาวแบบเดิม</div>
+        </div>
+        <div>
+          <div class="ctl"><label>รูปแบบการเรียง <b id="vPack">8 × 9</b></label></div>
+          <div class="seg" id="packSeg" style="margin-bottom:12px">
+            <button data-c="8" data-r="9" class="on">8 × 9</button>
+            <button data-c="6" data-r="12">6 × 12</button>
+            <button data-c="12" data-r="6">12 × 6</button>
+            <button data-c="72" data-r="1">แถบยาว</button>
+          </div>
+          <div class="ctl"><label>ชั้นความลึกที่เลือก <b id="vSlice">1 / 72</b></label>
+            <input type="range" id="rSlice" min="1" max="72" value="1"></div>
+          <label class="toggle"><input type="checkbox" id="cPlay"> ไล่ชั้นอัตโนมัติ</label>
+          <div class="stats">
+            <div class="stat"><div class="k">ขนาดภาพที่ต้องส่ง</div><div class="v" id="sPack" style="font-size:16px">576 × 432</div></div>
+            <div class="stat"><div class="k">สัดส่วน</div><div class="v" id="sAr" style="font-size:16px">1.33 : 1</div></div>
+            <div class="stat"><div class="k">1 สไลซ์</div><div class="v" style="font-size:16px">72 × 48</div></div>
+            <div class="stat"><div class="k">pixel รวม</div><div class="v" style="font-size:16px">248,832</div></div>
+          </div>
+          <div class="note" id="packNote"><b>8 × 9 = 576 × 432</b> — ลงตัวพอดี ไม่มีช่องว่าง และใกล้จตุรัสที่สุดในบรรดาแบบที่ไม่เหลือเศษ</div>
+        </div>
+      </div>
+
+      <div style="margin-top:18px">
+        <table>
+          <tr><th>สิ่งที่ต้องส่ง</th><th>ค่า</th><th>หมายเหตุ</th></tr>
+          <tr><td>ขนาดภาพ / วิดีโอ</td><td><b>576 × 432 px</b></td><td>ห้ามย่อ-ขยาย · 1 pixel = 1 ดวง LED เป๊ะๆ</td></tr>
+          <tr><td>ขนาด 1 ช่อง (tile)</td><td><b>72 × 48 px</b></td><td>72 = แกนกว้างของจอ · 48 = แกนสูง</td></tr>
+          <tr><td>จำนวนช่อง</td><td><b>8 คอลัมน์ × 9 แถว = 72</b></td><td>ครบพอดี ไม่มีช่องว่าง</td></tr>
+          <tr><td>ลำดับการอ่าน</td><td><b>ซ้าย→ขวา แล้วลงแถวถัดไป</b></td><td>ช่องบนซ้าย = ชั้นที่ 1 · ช่องล่างขวา = ชั้นที่ 72</td></tr>
+          <tr><td>ความหมายของแต่ละช่อง</td><td><b>1 ช่อง = 1 ระดับความลึก</b></td><td>ไล่จากด้านหนึ่งของห้องไปอีกด้าน</td></tr>
+          <tr><td>เฟรมเรต</td><td><b>25–60 fps</b></td><td>ส่ง image sequence (PNG) หรือวิดีโอที่ไม่บีบสีแรง</td></tr>
+          <tr><td>สี</td><td><b>sRGB · ไม่มี alpha</b></td><td>ดำสนิท = ดวงนั้นดับ</td></tr>
+        </table>
+      </div>
+
+      <div class="note">🧭 <b>เช็คทิศทางความลึกก่อนเริ่มงานจริง</b> — ส่งไฟล์ทดสอบที่ชั้นที่ 1 เป็นสีแดงล้วน ชั้นที่ 72 เป็นสีน้ำเงินล้วน ที่เหลือดำ
+        แล้วดูของจริงว่าแดงอยู่ด้านหน้าหรือด้านหลัง ถ้ากลับด้านให้สลับลำดับ tile ที่ปลายทาง (แก้ที่ระบบ ไม่ต้องรื้อคอนเทนต์)</div>
+
+      <div class="note">📐 <b>ทำไมไม่ใช่ 499 × 499:</b> 248,832 = 2¹⁰ × 3⁵ ไม่มีตัวหารที่เป็นจตุรัสพอดี · ตัวหารที่ขนาบรากที่สอง (498.8) คือ 486 กับ 512
+        → <code>512 × 486</code> ใกล้จตุรัสที่สุด (1.05:1) แต่จะ<b>หั่นสไลซ์ข้ามบรรทัด</b> มองด้วยตาไม่รู้ว่าชั้นไหนเป็นชั้นไหน · <code>576 × 432</code> จึงใช้งานจริงง่ายกว่า</div>
+    </div>
+  </section>
+
+  <!-- ========= 4. LIVE DEMO ========= -->
+  <section>
+    <div class="h2"><span class="n">4</span> ลองเล่นจริง — จากโมเดล 3D สู่เม็ด LED</div>
     <div class="card">
       <p class="lead">ทั้ง 3 ช่องนี้คือ <b>pipeline เดียวกันทำงานสด</b>: โมเดลหมุน → กล้องตัดเป็นชั้น → texture → LED cube · ลากหมุนได้ทั้งช่องซ้ายและขวา</p>
       <div class="democtl">
@@ -192,7 +248,7 @@ projection = ortho · orthowidth = 1.0 · tz = 0.5</pre>
 
   <!-- ========= 4. PIPELINE ========= -->
   <section>
-    <div class="h2"><span class="n">4</span> เส้นทางข้อมูลทั้งระบบ (คลิกดูรายละเอียด)</div>
+    <div class="h2"><span class="n">5</span> เส้นทางข้อมูลทั้งระบบ (คลิกดูรายละเอียด)</div>
     <div class="pipe" id="pipe">
       <div class="st on" data-k="content"><div class="ic">🎨</div><div class="nm">soptotop</div><div class="ct">491 nodes · สร้างภาพ</div></div>
       <div class="st" data-k="color"><div class="ic">🔀</div><div class="nm">color_remix</div><div class="ct">TOP → CHOP</div></div>
@@ -205,7 +261,7 @@ projection = ortho · orthowidth = 1.0 · tz = 0.5</pre>
 
   <!-- ========= 4. CONTENT SOURCES ========= -->
   <section>
-    <div class="h2"><span class="n">5</span> แหล่งเนื้อหาใน soptotop</div>
+    <div class="h2"><span class="n">6</span> แหล่งเนื้อหาใน soptotop</div>
     <div class="card">
       <p class="lead">TD 2025 ใช้ <b>POPs</b> (Point Operators — ประมวลผลจุดบน GPU) ทั้งหมดรวมที่ <code>geo2</code> แล้วให้กล้อง 12 ตัวถ่าย</p>
       <table>
@@ -222,7 +278,7 @@ projection = ortho · orthowidth = 1.0 · tz = 0.5</pre>
 
   <!-- ========= 5. TEST ========= -->
   <section>
-    <div class="h2"><span class="n">6</span> วิธีฉีดสีทดสอบโดยไม่พังของเดิม</div>
+    <div class="h2"><span class="n">7</span> วิธีฉีดสีทดสอบโดยไม่พังของเดิม</div>
     <div class="card">
       <p class="lead">แทรก <b>switchTOP</b> ก่อน <code>flip1</code> เพื่อสลับระหว่างเนื้อหาจริงกับสีทดสอบ — กลับคืนได้ทันทีด้วยการเปลี่ยน index</p>
       <pre>red_test   = constantTOP  48×144  RGB(1, 0, 0)
@@ -237,7 +293,7 @@ src_switch.par.index = 0   # → กลับไปใช้เนื้อห�
 
   <!-- ========= 6. GOTCHAS ========= -->
   <section>
-    <div class="h2"><span class="n">7</span> ข้อควรระวัง</div>
+    <div class="h2"><span class="n">8</span> ข้อควรระวัง</div>
     <div class="gotcha" id="gotchas"></div>
   </section>
 
@@ -651,6 +707,120 @@ const G=[
 document.getElementById('gotchas').innerHTML=G.map(g=>'<div class="grow"><div class="gi">'+g[0]+'</div><div>'+g[1]+'</div></div>').join('');
 
 rs();rsA();rsDemo();stats();drawAtlas();drawSlicer();buildSource();demoStats();loopDemo();
+
+/* ===== 3. content packing: 72 slices -> grid ===== */
+(function(){
+  var cv=document.getElementById('pack'); if(!cv) return;
+  var ctx=cv.getContext('2d'), W=0,H=0,DPRp=1;
+  var TW=72, TH=48, N=72;
+  var PC=8, PR=9, cur=1, play=false, cells=[];
+  function rsz(){ DPRp=Math.min(devicePixelRatio||1,2); W=cv.clientWidth; H=cv.clientHeight;
+    cv.width=W*DPRp; cv.height=H*DPRp; ctx.setTransform(DPRp,0,0,DPRp,0,0); }
+  addEventListener('resize',function(){rsz();drawPack();});
+  function hueOf(i){ return 195+125*(i/(N-1)); }
+
+  function drawPack(){
+    if(!W) rsz();
+    ctx.clearRect(0,0,W,H);
+    var pad=12, sy=26, sh=22, sw=W-pad*2;
+    /* long strip */
+    for(var i=0;i<N;i++){
+      var x=pad+sw*i/N, w=sw/N;
+      ctx.fillStyle='hsla('+hueOf(i)+',85%,62%,'+(i===cur-1?0.98:0.30)+')';
+      ctx.fillRect(x+0.3,sy,Math.max(0.6,w-0.6),sh);
+    }
+    ctx.strokeStyle='rgba(255,255,255,.20)'; ctx.lineWidth=1; ctx.strokeRect(pad,sy,sw,sh);
+    ctx.fillStyle='#8d99b6'; ctx.font='11.5px Consolas,monospace'; ctx.textAlign='left';
+    ctx.fillText(LMX.t('ภาพยาวแบบเดิม')+'  5,184 × 48', pad, sy-7);
+
+    /* grid */
+    var gw=PC*TW, gh=PR*TH;
+    var availH=H-(sy+sh)-56, availW=W-pad*2;
+    var sc=Math.min(availW/gw, availH/gh);
+    var ox=(W-gw*sc)/2, oy=sy+sh+40;
+    cells=[];
+    for(var k=0;k<PC*PR;k++){
+      var c=k%PC, r=(k/PC)|0, slice=k;
+      var x=ox+c*TW*sc, y=oy+r*TH*sc, w=TW*sc, h=TH*sc;
+      cells.push({x:x,y:y,w:w,h:h,slice:slice});
+      if(slice<N){
+        ctx.fillStyle='hsla('+hueOf(slice)+',85%,58%,'+(slice===cur-1?0.95:0.26)+')';
+        ctx.fillRect(x,y,w,h);
+        ctx.strokeStyle=(slice===cur-1)?'#fff':'rgba(255,255,255,.16)';
+        ctx.lineWidth=(slice===cur-1)?2:1; ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
+        if(w>28){
+          ctx.fillStyle=(slice===cur-1)?'#04121a':'rgba(255,255,255,.72)';
+          ctx.font='bold '+Math.min(13,Math.max(9,w/4.6))+'px Consolas,monospace';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(String(slice+1), x+w/2, y+h/2);
+          ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+        }
+      } else {
+        ctx.fillStyle='rgba(255,93,143,.10)'; ctx.fillRect(x,y,w,h);
+        ctx.strokeStyle='rgba(255,93,143,.45)'; ctx.setLineDash([4,3]); ctx.lineWidth=1;
+        ctx.strokeRect(x+0.5,y+0.5,w-1,h-1); ctx.setLineDash([]);
+      }
+    }
+    /* connector strip -> cell */
+    var cc=cells[cur-1];
+    if(cc){
+      var fx=pad+sw*(cur-0.5)/N, fy=sy+sh;
+      ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.setLineDash([3,3]); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(cc.x+cc.w/2, cc.y); ctx.stroke(); ctx.setLineDash([]);
+    }
+    /* labels */
+    ctx.fillStyle='#8d99b6'; ctx.font='11.5px Consolas,monospace'; ctx.textAlign='left';
+    ctx.fillText(LMX.t('เรียงใหม่')+'  '+(PC*TW)+' × '+(PR*TH), pad, oy-10);
+    ctx.textAlign='right';
+    ctx.fillText(LMX.t('ชั้นที่')+' '+cur+' / '+N, W-pad, oy-10);
+    ctx.textAlign='left';
+    ctx.fillStyle='rgba(255,255,255,.45)'; ctx.font='10.5px Consolas,monospace';
+    ctx.fillText(LMX.t('อ่านซ้าย→ขวา แล้วลงแถวถัดไป'), pad, H-10);
+  }
+
+  function setSlice(v){
+    cur=Math.max(1,Math.min(N,v|0));
+    document.getElementById('rSlice').value=cur;
+    document.getElementById('vSlice').textContent=cur+' / '+N;
+    drawPack();
+  }
+  function setPack(c,r){
+    PC=c; PR=r;
+    var w=c*TW, h=r*TH, ar=Math.max(w,h)/Math.min(w,h);
+    document.getElementById('vPack').textContent=c+' × '+r;
+    document.getElementById('sPack').textContent=w+' × '+h;
+    document.getElementById('sAr').textContent=ar.toFixed(2)+' : 1';
+    var note=document.getElementById('packNote');
+    var empty=c*r-N;
+    if(c===72&&r===1) note.innerHTML=LMX.t('<b>แถบยาว 5,184 × 48</b> — ใช้ได้แต่ยาวมาก พรีวิว/ตัดต่อลำบาก และโปรแกรมตัดต่อหลายตัวไม่รับความกว้างระดับนี้');
+    else if(empty>0) note.innerHTML=LMX.t('<b>{c} × {r} = {w} × {h}</b> — เหลือช่องว่าง {e} ช่อง (กรอบชมพู) ต้องเติมดำไว้')
+      .replace('{c}',c).replace('{r}',r).replace('{w}',w).replace('{h}',h).replace('{e}',empty);
+    else note.innerHTML=LMX.t('<b>{c} × {r} = {w} × {h}</b> — ลงตัวพอดี ไม่มีช่องว่าง สัดส่วน {a} : 1')
+      .replace('{c}',c).replace('{r}',r).replace('{w}',w).replace('{h}',h).replace('{a}',ar.toFixed(2));
+    drawPack();
+  }
+  document.getElementById('packSeg').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});
+    setPack(+b.dataset.c, +b.dataset.r);
+  });
+  document.getElementById('rSlice').addEventListener('input',function(e){ setSlice(+e.target.value); });
+  document.getElementById('cPlay').addEventListener('change',function(e){ play=e.target.checked; });
+  cv.addEventListener('click',function(e){
+    var b=cv.getBoundingClientRect(), mx=e.clientX-b.left, my=e.clientY-b.top;
+    for(var i=0;i<cells.length;i++){
+      var c=cells[i];
+      if(mx>=c.x&&mx<=c.x+c.w&&my>=c.y&&my<=c.y+c.h&&c.slice<N){ setSlice(c.slice+1); return; }
+    }
+  });
+  var acc=0, last=0;
+  (function loop(t){
+    if(play){ acc+=(t-last)||0; if(acc>110){ acc=0; setSlice(cur>=N?1:cur+1); } }
+    last=t; requestAnimationFrame(loop);
+  })(0);
+  rsz(); setPack(8,9);
+  if(window.LMX) LMX.onLang(function(){ setPack(PC,PR); });
+})();
 
 if(window.LMX) LMX.onLang(function(){ try{drawAtlas();}catch(e){} });
 </script>

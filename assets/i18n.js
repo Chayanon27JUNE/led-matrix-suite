@@ -322,5 +322,72 @@ window.LMX_EN = {
   '<b>Outside the frame!</b> the scene is {s} tall but the camera only sees {f} → every renderpass comes back black and the whole texture reads 0, yet <b>TD reports no error</b>',
 '<b>พอดีกรอบ</b> — scene สูง {s} · กรอบสูง {f}': '<b>Fits the frame</b> — scene height {s} · frame height {f}',
 '<br>(ได้จาก <span class="mono">geo2.sy = 12 / Slicew = {v}</span> — ผลคือ scene ถูกบีบแนวตั้งให้พอดี volume ทรงกว้าง)':
-  '<br>(from <span class="mono">geo2.sy = 12 / Slicew = {v}</span> — the scene is squeezed vertically to fit the wide, short volume)'
+  '<br>(from <span class="mono">geo2.sy = 12 / Slicew = {v}</span> — the scene is squeezed vertically to fit the wide, short volume)',
+
+/* ---------- system.html §3 : real scale + content packing ---------- */
+'ของจริงคือ 72×72×48 — เตรียมคอนเทนต์ยังไง': 'The real build is 72×72×48 — how to prepare content',
+'ที่อธิบายมาข้างบนคือสเกลต้นแบบ 12 ชั้น ·': 'Everything above is the 12-layer prototype ·',
+'ของจริงที่จะติดตั้งคือ 72 (กว้าง) × 72 (ลึก) × 48 (สูง) = 248,832 ดวง':
+  'the real installation is 72 (wide) × 72 (deep) × 48 (high) = 248,832 pixels',
+'คอนเทนต์จึงถูกหั่นเป็น': 'so the content is cut into',
+'สไลซ์ขนาด 72 × 48 จำนวน 72 แผ่น': '72 slices of 72 × 48',
+'(แผ่นละ 1 ระดับความลึก) — ถ้าวางต่อกันเป็นแถวเดียวจะได้ภาพยาว':
+  '(one slice per depth level) — laid out in a single row that gives a strip of',
+'ซึ่งยาวเกินไปจนใช้งานลำบาก': 'which is far too long to work with',
+'เอามาเรียงใหม่เป็นตาราง 8 × 9 ได้ภาพ 576 × 432': 'Repacked into an 8 × 9 grid it becomes 576 × 432',
+'— จำนวน pixel เท่าเดิมเป๊ะ แต่ทรงใกล้เคียงจตุรัส ทำงาน/พรีวิว/เข้ารหัสวิดีโอง่ายกว่ามาก':
+  '— exactly the same pixel count, but close to square, so it is far easier to author, preview and encode.',
+'🖱️ คลิกช่องไหนก็ได้เพื่อดูว่ามันคือชั้นความลึกไหน · แถบบน = ภาพยาวแบบเดิม':
+  '🖱️ Click any cell to see which depth layer it is · the bar on top is the original long strip',
+'รูปแบบการเรียง': 'Packing layout',
+'แถบยาว': 'Long strip',
+'ชั้นความลึกที่เลือก': 'Selected depth layer',
+'ไล่ชั้นอัตโนมัติ': 'Cycle through layers',
+'ขนาดภาพที่ต้องส่ง': 'Deliverable size',
+'สัดส่วน': 'Aspect',
+'1 สไลซ์': 'One slice',
+'pixel รวม': 'Total pixels',
+'แถบยาว 5,184 × 48': 'Long strip 5,184 × 48',
+'— ใช้ได้แต่ยาวมาก พรีวิว/ตัดต่อลำบาก และโปรแกรมตัดต่อหลายตัวไม่รับความกว้างระดับนี้':
+  '— it works, but it is unwieldy to preview and edit, and many editors refuse a canvas this wide',
+'สิ่งที่ต้องส่ง': 'Deliverable',
+'ค่า': 'Value',
+'หมายเหตุ': 'Notes',
+'ขนาดภาพ / วิดีโอ': 'Image / video size',
+'ห้ามย่อ-ขยาย · 1 pixel = 1 ดวง LED เป๊ะๆ': 'Never rescale · one pixel is exactly one LED',
+'ขนาด 1 ช่อง (tile)': 'Tile size',
+'72 = แกนกว้างของจอ · 48 = แกนสูง': '72 = the screen width axis · 48 = the height axis',
+'จำนวนช่อง': 'Tile count',
+'8 คอลัมน์ × 9 แถว = 72': '8 columns × 9 rows = 72',
+'ครบพอดี ไม่มีช่องว่าง': 'Exactly full, no empty cells',
+'ลำดับการอ่าน': 'Reading order',
+'ซ้าย→ขวา แล้วลงแถวถัดไป': 'Left → right, then the next row down',
+'ช่องบนซ้าย = ชั้นที่ 1 · ช่องล่างขวา = ชั้นที่ 72': 'Top-left = layer 1 · bottom-right = layer 72',
+'ความหมายของแต่ละช่อง': 'What one tile means',
+'1 ช่อง = 1 ระดับความลึก': 'One tile = one depth level',
+'ไล่จากด้านหนึ่งของห้องไปอีกด้าน': 'Stepping from one side of the volume to the other',
+'เฟรมเรต': 'Frame rate',
+'ส่ง image sequence (PNG) หรือวิดีโอที่ไม่บีบสีแรง': 'Deliver a PNG image sequence, or video without heavy chroma compression',
+'sRGB · ไม่มี alpha': 'sRGB · no alpha',
+'ดำสนิท = ดวงนั้นดับ': 'Pure black = that LED is off',
+'เช็คทิศทางความลึกก่อนเริ่มงานจริง': 'Check the depth direction before starting real work',
+'— ส่งไฟล์ทดสอบที่ชั้นที่ 1 เป็นสีแดงล้วน ชั้นที่ 72 เป็นสีน้ำเงินล้วน ที่เหลือดำ แล้วดูของจริงว่าแดงอยู่ด้านหน้าหรือด้านหลัง ถ้ากลับด้านให้สลับลำดับ tile ที่ปลายทาง (แก้ที่ระบบ ไม่ต้องรื้อคอนเทนต์)':
+  '— send a test file with layer 1 pure red, layer 72 pure blue and everything else black, then look at the real wall: is the red at the front or the back? If it is flipped, reverse the tile order on the system side — no need to rebuild the content.',
+'ทำไมไม่ใช่ 499 × 499:': 'Why not 499 × 499:',
+'248,832 = 2¹⁰ × 3⁵ ไม่มีตัวหารที่เป็นจตุรัสพอดี · ตัวหารที่ขนาบรากที่สอง (498.8) คือ 486 กับ 512 →':
+  '248,832 = 2¹⁰ × 3⁵ has no square divisor pair · the divisors bracketing its square root (498.8) are 486 and 512 →',
+'ใกล้จตุรัสที่สุด (1.05:1) แต่จะ': 'is the closest to square (1.05:1), but it would',
+'หั่นสไลซ์ข้ามบรรทัด': 'cut slices across rows',
+'มองด้วยตาไม่รู้ว่าชั้นไหนเป็นชั้นไหน ·': 'making it impossible to tell the layers apart by eye ·',
+'จึงใช้งานจริงง่ายกว่า': 'is the practical choice',
+'ภาพยาวแบบเดิม': 'Original long strip',
+'เรียงใหม่': 'Repacked',
+'ชั้นที่': 'layer',
+'อ่านซ้าย→ขวา แล้วลงแถวถัดไป': 'read left → right, then down to the next row',
+'<b>{c} × {r} = {w} × {h}</b> — ลงตัวพอดี ไม่มีช่องว่าง สัดส่วน {a} : 1':
+  '<b>{c} × {r} = {w} × {h}</b> — an exact fit with no empty cells, aspect {a} : 1',
+'<b>{c} × {r} = {w} × {h}</b> — เหลือช่องว่าง {e} ช่อง (กรอบชมพู) ต้องเติมดำไว้':
+  '<b>{c} × {r} = {w} × {h}</b> — {e} cells left over (pink outline); fill them with black',
+'<b>แถบยาว 5,184 × 48</b> — ใช้ได้แต่ยาวมาก พรีวิว/ตัดต่อลำบาก และโปรแกรมตัดต่อหลายตัวไม่รับความกว้างระดับนี้':
+  '<b>Long strip 5,184 × 48</b> — usable, but unwieldy to preview and edit, and many editors refuse a canvas this wide'
 };
